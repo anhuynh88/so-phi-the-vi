@@ -1,0 +1,1820 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sổ phí thẻ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Design system: "Customer area home" (D:\Webtest\copycat\.claude\skills\design-system) — structured, accessible, implementation-first.
+   Tokens from that spec: text #111111, link/action #005ebd, raised #cef6e2, strong #ffffff, dark surface #000000/#111110,
+   type scale 12/13.33/14/16/20/24, spacing 2–20px, radius 6/8px, inset hairline shadow, motion 100/125/150/250ms.
+   Single light theme, like the source design; every color is set explicitly. */
+:root {
+  color-scheme: light;
+  --color-text-primary: #111111; --color-text-secondary: #4b5563; --color-text-muted: #6b7280; --color-text-tertiary: #005ebd;
+  --color-surface-base: #000000; --color-surface-muted: #111110; --color-surface-raised: #cef6e2; --color-surface-strong: #ffffff;
+  --color-surface-page: #f3f5f7; --color-surface-sunken: #eef1f4; --color-border: #dfe3e8; --color-border-strong: #c5ccd5;
+  --color-action: #005ebd; --color-action-hover: #004a96; --color-action-soft: #e5f0fb; --color-focus: #005ebd;
+  --color-good: #0b6b3a; --color-good-bg: #cef6e2; --color-info: #005ebd; --color-info-bg: #e5f0fb;
+  --color-warn: #7a4b00; --color-warn-bg: #fff1d1; --color-crit: #b3001b; --color-crit-bg: #fde8eb;
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --fs-xs: 12px; --fs-sm: 13.33px; --fs-md: 14px; --fs-lg: 16px; --fs-xl: 20px; --fs-2xl: 24px;
+  --sp-1: 2px; --sp-2: 4px; --sp-3: 6px; --sp-4: 8px; --sp-5: 10px; --sp-6: 12px; --sp-7: 16px; --sp-8: 20px; --sp-9: 24px; --sp-10: 32px;
+  --radius-xs: 6px; --radius-sm: 8px; --shadow-1: inset 0 0 0 1px var(--color-border);
+  --dur-instant: 100ms; --dur-fast: 125ms; --dur-normal: 150ms; --dur-slow: 250ms;
+}
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { margin: 0; background: var(--color-surface-page); color: var(--color-text-primary); font: 400 var(--fs-md)/1.5 var(--font-ui); -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--color-surface-base) }
+select, button, input { font: inherit; color: inherit }
+a { color: var(--color-text-tertiary); text-underline-offset: 2px }
+a:hover { color: var(--color-action-hover) }
+.mono { font-family: var(--font-mono) }
+[hidden]:not([hidden=until-found i]) { display: none !important }
+::-webkit-scrollbar { width: 8px; height: 8px } ::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 8px } ::-webkit-scrollbar-track { background: transparent }
+a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, .drop:focus-visible, .drop-sm:focus-visible, summary:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px }
+
+/* ---------- shell */
+.app { min-height: 100%; display: grid; grid-template-rows: 56px minmax(0, 1fr) auto }
+.top { background: var(--color-surface-base); color: #fff; display: flex; align-items: center; gap: var(--sp-7); min-width: 0;
+  padding-left: max(var(--sp-8), env(safe-area-inset-left, 0px)); padding-right: max(var(--sp-8), env(safe-area-inset-right, 0px)); position: sticky; top: 0; z-index: 20 }
+.logo { display: flex; align-items: center; gap: var(--sp-5); text-decoration: none; color: #fff; min-width: 0 }
+.logo:hover { color: #fff }
+.mark { width: 28px; height: 28px; border-radius: var(--radius-xs); background: var(--color-surface-raised); color: var(--color-surface-base); display: grid; place-items: center; font-weight: 700; font-size: var(--fs-md); flex: none }
+.wordmark { font-size: var(--fs-lg); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em }
+.env { font-size: var(--fs-xs); font-weight: 600; color: var(--color-surface-base); background: var(--color-surface-raised); padding: var(--sp-1) var(--sp-4); border-radius: 999px }
+.top-links { margin-left: auto; display: flex; align-items: center; gap: var(--sp-2) }
+.top-links .lnk { font-size: var(--fs-sm); font-weight: 500; color: rgba(255, 255, 255, 0.78); text-decoration: none; padding: var(--sp-3) var(--sp-5); border-radius: var(--radius-xs); transition: background var(--dur-fast), color var(--dur-fast) }
+.top-links .lnk:hover { color: #fff; background: rgba(255, 255, 255, 0.1) }
+.cta { font-size: var(--fs-sm); font-weight: 600; color: var(--color-surface-base); background: #fff; text-decoration: none; padding: var(--sp-3) var(--sp-6); border-radius: var(--radius-xs); white-space: nowrap; margin-left: var(--sp-4); transition: background var(--dur-fast) }
+.cta:hover { color: var(--color-surface-base); background: var(--color-surface-raised) }
+
+.layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 0 }
+.sidenav { background: var(--color-surface-strong); border-right: 1px solid var(--color-border); padding: var(--sp-7) var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-8);
+  position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; padding-left: max(var(--sp-6), env(safe-area-inset-left, 0px)) }
+.sec-label { font-size: var(--fs-xs); font-weight: 600; color: var(--color-text-muted); padding: 0 var(--sp-4); margin-bottom: var(--sp-2) }
+.nav-groups { display: grid; gap: var(--sp-7) }
+nav.tabs { display: flex; flex-direction: column; gap: var(--sp-1) }
+nav.tabs a { display: flex; align-items: center; gap: var(--sp-5); padding: var(--sp-4) var(--sp-5); border-radius: var(--radius-xs); font-size: var(--fs-md); font-weight: 500; color: var(--color-text-primary); text-decoration: none; white-space: nowrap; transition: background var(--dur-fast), color var(--dur-fast) }
+nav.tabs a::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--color-border-strong); flex: none; transition: background var(--dur-fast) }
+nav.tabs a:hover { background: var(--color-surface-sunken) }
+nav.tabs a[aria-current="page"] { background: var(--color-action-soft); color: var(--color-action); font-weight: 600 }
+nav.tabs a[aria-current="page"]::before { background: var(--color-action) }
+body.ch-bsp [data-ch="ECOM"] { display: none !important }
+#rail-list { display: flex; flex-direction: column; gap: var(--sp-1) }
+.thumb { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--sp-1) var(--sp-4); width: 100%; background: none; border: 0; border-radius: var(--radius-xs); padding: var(--sp-4) var(--sp-5); cursor: pointer; text-align: left; color: var(--color-text-primary); transition: background var(--dur-fast) }
+.thumb:hover { background: var(--color-surface-sunken) }
+.thumb[aria-current="true"] { background: var(--color-surface-sunken); box-shadow: inset 3px 0 0 var(--color-action) }
+.thumb .pg { display: contents }
+.thumb .pg b { font-size: var(--fs-md); font-weight: 600; grid-column: 1 }
+.thumb .pg i { font-style: normal; font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-muted); grid-column: 1 }
+.thumb .pg .ln { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: var(--color-action); opacity: 0.55 }
+.thumb .lab { grid-column: 2; grid-row: 1; font-size: var(--fs-xs); font-weight: 600; color: var(--color-good); background: var(--color-good-bg); padding: 0 var(--sp-3); border-radius: 999px; white-space: nowrap }
+.thumb .lab.no { color: var(--color-text-secondary); background: var(--color-surface-sunken) }
+.add { display: block; text-align: center; border: 1px dashed var(--color-border-strong); border-radius: var(--radius-xs); padding: var(--sp-4); font-size: var(--fs-sm); font-weight: 600; color: var(--color-text-tertiary); text-decoration: none; margin-top: var(--sp-2); transition: border-color var(--dur-fast), background var(--dur-fast) }
+.add:hover { border-color: var(--color-action); background: var(--color-action-soft) }
+
+.page { min-width: 0; padding: var(--sp-9) max(var(--sp-9), env(safe-area-inset-right, 0px)) var(--sp-10) var(--sp-9) }
+.page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--sp-6) var(--sp-7); margin-bottom: var(--sp-8); max-width: 1440px; margin-left: auto; margin-right: auto }
+.page-head h1 { margin: 0; font-size: var(--fs-2xl); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25 }
+.meta { margin-top: var(--sp-2); font-size: var(--fs-sm); color: var(--color-text-muted); overflow-wrap: anywhere }
+.page-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-5) var(--sp-6) }
+.tool-label { font-size: var(--fs-xs); font-weight: 600; color: var(--color-text-muted) }
+.seg { display: inline-flex; gap: 2px; padding: 2px; background: var(--color-surface-strong); border: 1px solid var(--color-border); border-radius: var(--radius-xs) }
+.seg button { border: 0; background: transparent; min-height: 30px; padding: 0 var(--sp-6); border-radius: 4px; font-size: var(--fs-sm); font-weight: 600; color: var(--color-text-secondary); cursor: pointer; transition: background var(--dur-fast), color var(--dur-fast) }
+.seg button:hover { background: var(--color-surface-sunken); color: var(--color-text-primary) }
+.seg button[aria-pressed="true"] { background: var(--color-surface-base); color: #fff }
+.pager { display: inline-flex; align-items: center; background: var(--color-surface-strong); border: 1px solid var(--color-border); border-radius: var(--radius-xs) }
+.pager button { border: 0; background: transparent; width: 34px; height: 34px; cursor: pointer; color: var(--color-text-primary); font-size: var(--fs-lg); line-height: 1; transition: background var(--dur-fast) }
+.pager button:first-child { border-radius: var(--radius-xs) 0 0 var(--radius-xs) } .pager button:last-child { border-radius: 0 var(--radius-xs) var(--radius-xs) 0 }
+.pager button:hover:not(:disabled) { background: var(--color-surface-sunken) } .pager button:active:not(:disabled) { background: var(--color-border) }
+.pager button:disabled { color: var(--color-border-strong); cursor: not-allowed }
+.pager span { min-width: 88px; text-align: center; font-size: var(--fs-md); font-weight: 600; border-left: 1px solid var(--color-border); border-right: 1px solid var(--color-border); line-height: 34px }
+.content { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--sp-9); align-items: start; max-width: 1440px; margin: 0 auto }
+main.wrap { display: grid; gap: var(--sp-8); min-width: 0 }
+
+.side-panel { display: flex; flex-direction: column; gap: var(--sp-7); position: sticky; top: calc(56px + var(--sp-9)) }
+details.card { background: var(--color-surface-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-1) }
+details.card > summary { list-style: none; cursor: pointer; padding: var(--sp-6) var(--sp-7); font-size: var(--fs-lg); font-weight: 600; display: flex; justify-content: space-between; align-items: center; border-radius: var(--radius-sm) }
+details.card > summary::-webkit-details-marker { display: none }
+details.card > summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--color-text-muted); border-bottom: 2px solid var(--color-text-muted); transform: rotate(45deg) translate(-2px, -2px); transition: transform var(--dur-normal) }
+details.card:not([open]) > summary::after { transform: rotate(-45deg) }
+.card-body { padding: 0 var(--sp-7) var(--sp-7); display: grid; gap: var(--sp-6) }
+.field { display: grid; gap: var(--sp-2) } .field label { font-size: var(--fs-sm); font-weight: 600 }
+.hint { font-size: var(--fs-xs); color: var(--color-text-muted) }
+select, input[type="month"], input[type="number"] { background: var(--color-surface-strong); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xs); padding: var(--sp-3) var(--sp-5); font-size: var(--fs-md); min-height: 36px; transition: border-color var(--dur-fast) }
+select { width: 100%; min-width: 0; cursor: pointer }
+select:hover, input:hover { border-color: var(--color-text-muted) } select:focus-visible, input:focus-visible { outline-offset: 0; border-color: var(--color-focus) }
+select:disabled, input:disabled { background: var(--color-surface-sunken); color: var(--color-text-muted); cursor: not-allowed }
+input[type="text"], input[type="password"] { background: var(--color-surface-strong); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xs); padding: var(--sp-3) var(--sp-5); font-size: var(--fs-md); min-height: 36px; width: 100%; min-width: 0 }
+.login-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--sp-6); align-items: end; max-width: 760px }
+#v-tai-len.locked > :not(#up-lock) { display: none !important }
+#v-tai-len:not(.locked) > #up-lock { display: none }
+input[type="number"] { width: 70px; text-align: right; min-height: 30px; padding: var(--sp-1) var(--sp-4) }
+.kv { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-4) var(--sp-5); font-size: var(--fs-sm); margin: 0 } .kv dt { color: var(--color-text-secondary) } .kv dd { margin: 0; text-align: right; font-weight: 600 }
+.kv dd small { display: block; font-weight: 400; color: var(--color-text-muted); font-size: var(--fs-xs) }
+.alert-list { display: grid; gap: var(--sp-4); margin: 0; padding: 0; list-style: none } .alert-list li { display: flex; gap: var(--sp-4); font-size: var(--fs-sm); align-items: baseline }
+.run { display: block; text-align: center; font-size: var(--fs-md); font-weight: 600; color: #fff; text-decoration: none; padding: var(--sp-5); border-radius: var(--radius-xs); background: var(--color-action); transition: background var(--dur-fast) }
+.run:hover { color: #fff; background: var(--color-action-hover) }
+
+.statusbar { background: var(--color-surface-strong); border-top: 1px solid var(--color-border); display: flex; align-items: center; gap: var(--sp-5); font-size: var(--fs-xs); color: var(--color-text-secondary); min-width: 0;
+  padding: var(--sp-3) max(var(--sp-8), env(safe-area-inset-right, 0px)) calc(var(--sp-3) + env(safe-area-inset-bottom, 0px)) max(var(--sp-8), env(safe-area-inset-left, 0px)) }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #1aa35a; flex: none }
+.dot.busy { background: var(--color-action); animation: pulse 1.1s ease-in-out infinite }
+.dot.err { background: var(--color-crit) }
+@keyframes pulse { 50% { opacity: 0.3 } }
+#status { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0 }
+.statusbar .stats { margin-left: auto; font-family: var(--font-mono); white-space: nowrap }
+
+/* ---------- report content */
+.view[hidden] { display: none } .view { display: grid; gap: var(--sp-8) }
+h2 { margin: 0; font-size: var(--fs-xl); font-weight: 600; text-wrap: balance; line-height: 1.3 }
+h3 { margin: 0; font-size: var(--fs-lg); font-weight: 600; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-4) }
+.sub { margin: var(--sp-2) 0 0; color: var(--color-text-secondary); font-size: var(--fs-sm); max-width: 90ch }
+.panel { background: var(--color-surface-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-1); padding: var(--sp-8) var(--sp-9); display: grid; gap: var(--sp-7); align-content: start; min-width: 0 }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--sp-4) var(--sp-7) }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: var(--sp-8) }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-6) }
+.panel .kpis { gap: var(--sp-4) }
+.kpi { background: var(--color-surface-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-1); padding: var(--sp-7); display: grid; gap: var(--sp-2); min-width: 0 }
+.panel .kpi { background: var(--color-surface-page); box-shadow: none }
+.kpi .lab { font-size: var(--fs-sm); font-weight: 500; color: var(--color-text-secondary) }
+.kpi .val { font-size: var(--fs-xl); font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25 }
+.kpi .val small { font-size: var(--fs-xs); font-weight: 500; color: var(--color-text-muted) }
+.kpi .delta { font-size: var(--fs-xs); color: var(--color-text-muted) }
+.up { color: var(--color-crit) } .down { color: var(--color-good) }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-xs) }
+table { border-collapse: collapse; width: 100%; font-size: var(--fs-sm) }
+th, td { padding: var(--sp-4) var(--sp-6); text-align: left; border-bottom: 1px solid var(--color-border); vertical-align: top }
+th { font-size: var(--fs-xs); font-weight: 600; color: var(--color-text-secondary); background: var(--color-surface-page); position: sticky; top: 0; white-space: nowrap }
+th.n, td.n { text-align: right; white-space: nowrap }
+td.n { font-family: var(--font-mono); font-size: var(--fs-xs) }
+tbody tr { transition: background var(--dur-instant) }
+tbody tr:hover td { background: #f7f9fb } tbody tr:last-child td { border-bottom: 0 }
+tr.grp td, tr.grp:hover td { background: var(--color-surface-sunken); font-weight: 600 }
+tr.tot td { font-weight: 700; border-top: 1px solid var(--color-border-strong); background: var(--color-surface-page) }
+td.mono { font-family: var(--font-mono); font-size: var(--fs-xs) }
+.note { font-size: var(--fs-xs); color: var(--color-text-muted) }
+.chip { display: inline-flex; align-items: center; gap: var(--sp-2); padding: 0 var(--sp-4); border-radius: 999px; font-size: var(--fs-xs); font-weight: 600; white-space: nowrap; line-height: 20px; font-family: var(--font-ui) }
+.c-good { color: var(--color-good); background: var(--color-good-bg) } .c-warn { color: var(--color-warn); background: var(--color-warn-bg) }
+.c-crit { color: var(--color-crit); background: var(--color-crit-bg) } .c-info { color: var(--color-info); background: var(--color-info-bg) } .c-mute { color: var(--color-text-secondary); background: var(--color-surface-sunken) }
+.sec-tag { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.06em; padding: 0 var(--sp-4); border-radius: 4px; background: var(--color-surface-base); color: #fff; line-height: 20px }
+.sec-num { width: 24px; height: 24px; border-radius: 50%; background: var(--color-surface-base); color: #fff; display: inline-grid; place-items: center; font-size: var(--fs-xs); font-weight: 700; flex: none }
+.bars { display: grid; gap: var(--sp-5) }
+.bar-row { display: grid; grid-template-columns: minmax(90px, 180px) 1fr auto; gap: var(--sp-6); align-items: center; min-width: 0 }
+.bar-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-sm) }
+.bar-track { height: 8px; background: var(--color-surface-sunken); border-radius: 999px; overflow: hidden; display: flex }
+.bar-fill { height: 100%; background: var(--color-action); border-radius: 999px }
+.bar-row .v { font-family: var(--font-mono); font-size: var(--fs-xs); white-space: nowrap; text-align: right; min-width: 110px; color: var(--color-text-secondary) }
+.filters { display: flex; flex-wrap: wrap; gap: var(--sp-4); align-items: center } .filters select { width: auto }
+.filterbar { display: flex; flex-wrap: wrap; gap: var(--sp-5) var(--sp-6); align-items: flex-end }
+.filterbar .field { flex: 1 1 150px; min-width: 140px; max-width: 230px }
+.callout { background: var(--color-info-bg); border-radius: var(--radius-xs); padding: var(--sp-5) var(--sp-6); font-size: var(--fs-sm) }
+.callout.warn { background: var(--color-warn-bg) }
+details.more > summary { cursor: pointer; color: var(--color-text-tertiary); font-size: var(--fs-sm); font-weight: 600; padding: var(--sp-2) 0 }
+details.more[open] > summary { margin-bottom: var(--sp-5) }
+.empty { background: var(--color-surface-strong); border-radius: var(--radius-sm); box-shadow: var(--shadow-1); color: var(--color-text-secondary); text-align: center; padding: 64px var(--sp-8); display: grid; gap: var(--sp-4); justify-items: center }
+.empty strong { color: var(--color-text-primary); font-size: var(--fs-lg); font-weight: 600 }
+.btn { display: inline-flex; align-items: center; gap: var(--sp-3); border: 1px solid var(--color-border-strong); background: var(--color-surface-strong); color: var(--color-text-primary); padding: var(--sp-3) var(--sp-6); min-height: 34px; border-radius: var(--radius-xs); cursor: pointer; font-size: var(--fs-sm); font-weight: 600; text-decoration: none; white-space: nowrap; transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast) }
+.btn:hover { background: var(--color-surface-sunken); color: var(--color-text-primary) } .btn:active { background: var(--color-border) }
+.btn.sm { min-height: 28px; padding: 0 var(--sp-5); font-size: var(--fs-xs) }
+.btn.primary { background: var(--color-action); color: #fff; border-color: transparent }
+.btn.primary:hover { background: var(--color-action-hover); color: #fff }
+.btn.danger { color: var(--color-text-secondary) } .btn.danger:hover { color: var(--color-crit); background: var(--color-crit-bg); border-color: var(--color-crit) }
+.btn:disabled { opacity: 0.45; cursor: not-allowed }
+
+/* upload */
+.drop { background: var(--color-surface-strong); border: 1.5px dashed var(--color-border-strong); border-radius: var(--radius-sm); padding: 36px var(--sp-8); text-align: center; display: grid; gap: var(--sp-4); justify-items: center;
+  color: var(--color-text-secondary); cursor: pointer; transition: border-color var(--dur-normal), background var(--dur-normal) }
+.drop:hover, .drop-sm:hover { border-color: var(--color-action) }
+.drop.over, .drop-sm.over, .tile.over { border-color: var(--color-action); background: var(--color-action-soft) }
+.drop .big { color: var(--color-text-primary); font-size: var(--fs-lg); font-weight: 600 }
+.drop .icon { width: 44px; height: 52px; border-radius: var(--radius-xs); background: var(--color-surface-raised); color: var(--color-good); display: grid; place-items: end center; padding-bottom: var(--sp-4); font: 600 var(--fs-xs) var(--font-mono) }
+.drop-sm { border: 1.5px dashed var(--color-border-strong); border-radius: var(--radius-sm); padding: var(--sp-8); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-6); cursor: pointer; color: var(--color-text-secondary); transition: border-color var(--dur-normal), background var(--dur-normal) }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--sp-5) }
+.tile { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--sp-6); display: grid; gap: var(--sp-3); align-content: start; background: var(--color-surface-strong); transition: border-color var(--dur-fast), background var(--dur-fast) }
+.tile:hover { border-color: var(--color-border-strong) }
+.tile-head { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-4) }
+.tile-head b { overflow-wrap: anywhere }
+.tile .btn { justify-self: start; margin-top: var(--sp-2) }
+.folderline { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-4) var(--sp-6); font-size: var(--fs-sm) }
+.fold { display: inline-flex; align-items: center; gap: var(--sp-3); font-weight: 600 }
+.fold::before, .tree .fd::before { content: ""; width: 15px; height: 11px; border-radius: 2px; background: #ffe7a6; box-shadow: inset 0 0 0 1px #d9b45b; flex: none }
+.folders { display: flex; flex-wrap: wrap; gap: var(--sp-3) }
+.folders button { border: 1px solid var(--color-border-strong); background: var(--color-surface-strong); border-radius: 999px; padding: 0 var(--sp-6); min-height: 30px; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; transition: background var(--dur-fast) }
+.folders button:hover { background: var(--color-surface-sunken) }
+.folders button[aria-pressed="true"] { background: var(--color-surface-base); border-color: var(--color-surface-base); color: #fff }
+.tree { display: grid; font-size: var(--fs-sm) }
+.tree .fd { display: flex; align-items: center; gap: var(--sp-4); font-weight: 600; padding: var(--sp-3) 0 }
+.tree .fd .note { font-weight: 400 }
+.tree .fl { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-6); padding: var(--sp-3) 0; border-bottom: 1px solid var(--color-surface-sunken) }
+.tree .fl .nm { flex: 1 1 240px; overflow-wrap: anywhere; min-width: 0 }
+.tree .l1 { padding-left: var(--sp-8) } .tree .l2 { padding-left: 40px } .tree .l3 { padding-left: 60px }
+.uplog { display: grid; gap: var(--sp-3); margin: 0; padding: 0; list-style: none; font-size: var(--fs-sm) }
+.uplog li { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5); align-items: center }
+.uplog li .nm { overflow-wrap: anywhere; min-width: 0 }
+#jobs { display: grid; gap: var(--sp-6) }
+#jobs:empty { display: none }
+.job { border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--sp-7) var(--sp-8); display: grid; gap: var(--sp-5) }
+.job-head { display: flex; flex-wrap: wrap; gap: var(--sp-4) var(--sp-7); justify-content: space-between; align-items: center; min-width: 0 } .job-head b { overflow-wrap: anywhere }
+.job .facts { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-8); font-size: var(--fs-sm); color: var(--color-text-secondary) } .job .facts b { color: var(--color-text-primary); font-family: var(--font-mono) }
+.warnlist { margin: 0; padding-left: var(--sp-8); color: var(--color-warn); font-size: var(--fs-sm) }
+.actions { display: flex; flex-wrap: wrap; gap: var(--sp-4); align-items: center }
+svg text { fill: var(--color-text-muted); font-size: 11px; font-family: var(--font-mono) }
+.trend-line { fill: none; stroke: var(--color-action); stroke-width: 2 } .trend-dot { fill: var(--color-action) } .gridline { stroke: var(--color-border); stroke-width: 1 }
+.toast { position: fixed; right: max(var(--sp-7), env(safe-area-inset-right, 0px)); bottom: calc(48px + env(safe-area-inset-bottom, 0px)); background: var(--color-surface-muted); color: #fff; padding: var(--sp-5) var(--sp-7); border-radius: var(--radius-xs); font-size: var(--fs-sm); z-index: 40; max-width: min(420px, calc(100vw - 32px)); animation: rise var(--dur-slow) ease-out }
+@keyframes rise { from { opacity: 0; transform: translateY(6px) } }
+
+@media (max-width: 1180px) {
+  .content { grid-template-columns: minmax(0, 1fr) }
+  .side-panel { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: start }
+}
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr) }
+  .sidenav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--color-border); padding: var(--sp-6) max(var(--sp-7), env(safe-area-inset-right, 0px)) var(--sp-6) max(var(--sp-7), env(safe-area-inset-left, 0px)); gap: var(--sp-6) }
+  .sidenav .sec-label { display: none }
+  .nav-groups { display: flex; overflow-x: auto; scrollbar-width: none; gap: var(--sp-2) }
+  nav.tabs { flex-direction: row }
+  nav.tabs a { flex: none } nav.tabs a::before { display: none }
+  .periods { display: flex; align-items: center; gap: var(--sp-4); overflow-x: auto }
+  #rail-list { flex-direction: row } .thumb { width: auto; flex: none; border: 1px solid var(--color-border) } .add { flex: none; margin: 0; padding: var(--sp-4) var(--sp-6) }
+  .page { padding: var(--sp-8) max(var(--sp-7), env(safe-area-inset-right, 0px)) var(--sp-9) max(var(--sp-7), env(safe-area-inset-left, 0px)) }
+  .top-links .lnk { display: none }
+  .tree .l1 { padding-left: var(--sp-6) } .tree .l2 { padding-left: var(--sp-8) } .tree .l3 { padding-left: 28px }
+}
+@media (max-width: 560px) {
+  .env, .cta { display: none } .panel { padding: var(--sp-7) } .page-head h1 { font-size: var(--fs-xl) }
+  .bar-row { grid-template-columns: minmax(70px, 120px) 1fr } .bar-row .v { grid-column: 1 / -1; text-align: left }
+  .filterbar .field { max-width: none }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+</style></head><body>
+
+<div class="app">
+<header class="top">
+  <a class="logo" href="#tong-quan" aria-label="Sổ phí thẻ và ví – Tổng quan"><span class="mark" aria-hidden="true">%</span><span class="wordmark">Sổ phí thẻ &amp; ví</span></a>
+  <span class="env">AITS</span>
+  <div class="top-links">
+    <a class="lnk" href="#doi-soat">Đối soát phí</a>
+    <a class="lnk" href="#hang-the">Hãng thẻ</a>
+    <a class="cta" href="#tai-len">Tải file tháng mới</a>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidenav" aria-label="Điều hướng">
+    <div class="nav-groups">
+      <div>
+        <div class="sec-label">Báo cáo</div>
+        <nav class="tabs" aria-label="Báo cáo">
+          <a href="#tong-quan" data-view="tong-quan">Tổng quan</a>
+          <a href="#cong" data-view="cong">Cổng &amp; acquirer</a>
+          <a href="#hang-the" data-view="hang-the">Hãng thẻ</a>
+          <a href="#doi-soat" data-view="doi-soat">Đối soát phí</a>
+        </nav>
+      </div>
+      <div data-ch="ECOM">
+        <div class="sec-label">Kênh ECOM</div>
+        <nav class="tabs" aria-label="Kênh ECOM">
+          <a href="#adyen-card" data-view="adyen-card">Adyen Card</a>
+          <a href="#vcb-card" data-view="vcb-card">VCB Card</a>
+          <a href="#bin" data-view="bin">BIN thẻ</a>
+        </nav>
+      </div>
+      <div>
+        <div class="sec-label">Dữ liệu</div>
+        <nav class="tabs" aria-label="Dữ liệu">
+          <a href="#tai-len" data-view="tai-len">Tải file</a>
+        </nav>
+      </div>
+    </div>
+    <div class="periods">
+      <div class="sec-label">Kỳ báo cáo</div>
+      <div id="rail-list"></div>
+      <a class="add" href="#tai-len">+ Thêm kỳ</a>
+    </div>
+  </aside>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <h1 id="page-title">Tổng quan</h1>
+        <div class="meta" id="meta"><span id="meta-info"></span></div>
+      </div>
+      <div class="page-tools">
+        <span class="tool-label" id="chan-lab">Kênh</span>
+        <div class="seg" id="chan-seg" role="group" aria-labelledby="chan-lab">
+          <button type="button" data-chan="">Tất cả</button><button type="button" data-chan="ECOM">ECOM</button><button type="button" data-chan="BSP">BSP</button>
+        </div>
+        <div class="pager" role="group" aria-label="Chuyển kỳ">
+          <button type="button" id="pg-prev" aria-label="Kỳ trước">‹</button><span id="pg-label">—</span><button type="button" id="pg-next" aria-label="Kỳ sau">›</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+<main class="wrap">
+  <section class="view" id="v-tong-quan" data-v="tong-quan"></section>
+  <section class="view" id="v-cong" data-v="cong" hidden></section>
+  <section class="view" id="v-hang-the" data-v="hang-the" hidden></section>
+  <section class="view" id="v-doi-soat" data-v="doi-soat" hidden></section>
+  <section class="view" id="v-bin" data-v="bin" hidden></section>
+  <section class="view" id="v-adyen-card" data-v="adyen-card" hidden></section>
+  <section class="view" id="v-vcb-card" data-v="vcb-card" hidden></section>
+
+  <section class="view locked" id="v-tai-len" data-v="tai-len" hidden>
+    <form class="panel" id="up-lock" autocomplete="off">
+      <div><h2>Đăng nhập để tải file</h2><p class="sub">Nhập tài khoản và mật khẩu tải file. Đăng nhập giữ trong phiên trình duyệt này.</p></div>
+      <div class="login-grid">
+        <div class="field"><label for="lg-user">Tài khoản</label><input type="text" id="lg-user" autocomplete="username" required></div>
+        <div class="field"><label for="lg-pass">Mật khẩu</label><input type="password" id="lg-pass" autocomplete="current-password" required></div>
+      </div>
+      <div class="actions"><button type="submit" class="btn primary">Đăng nhập</button><span class="note" id="lg-msg" role="alert"></span></div>
+    </form>
+    <div class="panel">
+      <div class="panel-head">
+        <div><h3>Tài khoản tải file</h3><p class="sub" id="acc-sub">Đổi tài khoản và mật khẩu dùng để mở trang này.</p></div>
+        <div class="actions"><button type="button" class="btn" id="acc-lock">Đăng xuất</button></div>
+      </div>
+      <details class="more"><summary>Đổi tài khoản / mật khẩu</summary>
+        <form class="login-grid" id="acc-form" autocomplete="off">
+          <div class="field"><label for="acc-user">Tài khoản mới</label><input type="text" id="acc-user" autocomplete="username" required></div>
+          <div class="field"><label for="acc-pass">Mật khẩu mới</label><input type="password" id="acc-pass" autocomplete="new-password" required minlength="4"></div>
+          <div class="field"><label for="acc-pass2">Nhập lại mật khẩu</label><input type="password" id="acc-pass2" autocomplete="new-password" required></div>
+          <div class="actions"><button type="submit" class="btn primary">Lưu tài khoản</button><span class="note" id="acc-msg" role="status"></span></div>
+        </form>
+      </details>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div><h2>Tải dữ liệu tháng</h2><p class="sub">Chọn kỳ rồi thả file vào đúng mục. Mỗi kỳ có một thư mục <b>YYMM data</b> chia 3 mục BANK STATEMENT, BSP và ECOM. Thư mục của kỳ mới được tạo tự động khi bạn tải file đầu tiên của kỳ đó.</p></div>
+        <div class="filters"><label for="up-month" class="note">Kỳ dữ liệu</label><input type="month" id="up-month"></div>
+      </div>
+      <div id="up-folder"></div>
+      <div id="up-cap"></div>
+      <ul class="uplog" id="up-log"></ul>
+    </div>
+
+    <div class="panel">
+      <div><h3>File tổng hợp tháng (mẫu AITS)</h3><p class="sub">Dùng cho các trang báo cáo. Kỳ lấy từ ô Kỳ báo cáo trong file. Khi lưu kỳ, file gốc được cất vào thư mục YYMM data của kỳ đó.</p></div>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Thả file tổng hợp hoặc bấm để chọn file">
+        <div class="icon">.xlsx</div>
+        <div class="big">Thả file tổng hợp tháng vào đây</div>
+        <div class="note">File Excel (.xlsx, .xls) mẫu AITS, có sheet Tổng hợp và Tham số &amp; tỷ giá. Thả được nhiều tháng cùng lúc.</div>
+        <input type="file" id="file-in" accept=".xlsx,.xlsm,.xls" multiple hidden>
+      </div>
+      <div id="jobs"></div>
+    </div>
+
+    <div class="panel">
+      <div><h3><span class="sec-tag">BANK STATEMENT</span> Sao kê ngân hàng</h3><p class="sub">Sao kê các tài khoản nhận tiền. Nhận .xlsx, .xls, .csv, .md, .txt. Bảng có cột ngày tiền về sẽ được dùng cho tab Đối soát phí.</p></div>
+      <div class="drop-sm" id="up-bank" data-sec="BANK STATEMENT" data-acq="" tabindex="0" role="button" aria-label="Chọn file sao kê ngân hàng"><span>Thả file sao kê vào đây hoặc bấm để chọn file</span><span class="chip c-mute" id="up-bank-n">0 file</span></div>
+    </div>
+
+    <div class="panel">
+      <div><h3><span class="sec-tag">ECOM</span> Kênh ECOM theo acquirer</h3><p class="sub">Danh sách theo thư mục ContractMD\ECOM channel. Thả báo cáo settlement, file đối soát (.xlsx, .xls, .csv) hoặc tài liệu .md vào ô của acquirer.</p></div>
+      <div class="tiles" id="up-ECOM"></div>
+    </div>
+
+    <div class="panel">
+      <div><h3><span class="sec-tag">BSP</span> Kênh BSP theo acquirer</h3><p class="sub">Danh sách theo thư mục ContractMD\BSP Channel.</p></div>
+      <div class="tiles" id="up-BSP"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div><h3>Thư mục dữ liệu theo tháng</h3><p class="sub">File .zip giải nén ra đúng cấu trúc thư mục YYMM data, gồm cả các thư mục acquirer còn trống.</p></div>
+        <div class="actions"><button type="button" class="btn" id="zip-btn">Tải thư mục (.zip)</button></div>
+      </div>
+      <div class="folders" id="folder-list"></div>
+      <div class="tree" id="tree"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><div><h3>Các kỳ đã lưu</h3><p class="sub">Bản tóm tắt của từng kỳ đọc từ file tổng hợp. Mọi người mở trang này đều thấy các kỳ đã lưu.</p></div></div>
+      <div id="saved"></div>
+    </div>
+  </section>
+</main>
+
+      <aside class="side-panel" aria-label="Thông tin kỳ">
+        <details class="card" open>
+          <summary>Kỳ báo cáo</summary>
+          <div class="card-body">
+            <div class="field"><label for="sel-month">Kỳ đang xem</label><select id="sel-month"></select></div>
+            <div class="field"><label for="sel-prev">So sánh với</label><select id="sel-prev"></select>
+              <span class="hint">Các con số tổng sẽ hiện thêm mức thay đổi so với kỳ này.</span></div>
+          </div>
+        </details>
+        <a class="run" href="#tai-len">Tải file tháng mới</a>
+        <details class="card" open>
+          <summary>Tóm tắt kỳ</summary>
+          <div class="card-body" id="side-sum"></div>
+        </details>
+        <details class="card" open>
+          <summary>Cần chú ý</summary>
+          <div class="card-body" id="side-alerts"></div>
+        </details>
+        <details class="card">
+          <summary>Về dữ liệu</summary>
+          <div class="card-body" id="side-about"></div>
+        </details>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<footer class="statusbar">
+  <span class="dot busy" id="dot" aria-hidden="true"></span>
+  <span id="status" role="status">Đang mở kho dữ liệu đã lưu…</span>
+  <span class="stats" id="stats"></span>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* Fee workbook parser: turns the monthly "T\u1ed5ng h\u1ee3p thanh to\u00e1n" workbook (as grids of cell values)
+   into one compact month summary. Shared by the page (via SheetJS) and the seed script (via node). */
+(function (root) {
+  "use strict";
+  var SKIP = /^(Ghi ch\u00fa|T\u1ed5ng h\u1ee3p|Tham s\u1ed1)/i;
+  var GATE = { "Adyen Card": "Adyen", "Adyen LPM": "Adyen", "PayPal": "PayPal", "NAPAS": "NAPAS", "VNPay": "VNPay",
+    "MBBank": "MBBank", "2C2P": "2C2P", "Worldpay BSP": "Worldpay BSP", "Other BSP": "T\u1ed5 ch\u1ee9c th\u1ebb BSP", "UATP": "UATP" };
+
+  function txt(v) { return v === null || v === undefined ? "" : String(v).replace(/\s+/g, " ").trim(); }
+  function num(v) {
+    if (typeof v === "number" && isFinite(v)) return v;
+    if (typeof v === "string") { var s = v.replace(/,/g, "").trim(); if (/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s); }
+    return 0;
+  }
+  function r2(x) { return Math.round(x * 100) / 100; }
+  function r0(x) { return Math.round(x); }
+  function findCol(hdr, prefix) {
+    for (var i = 0; i < hdr.length; i++) if (txt(hdr[i]).toLowerCase().indexOf(prefix.toLowerCase()) === 0) return i;
+    return -1;
+  }
+  function findRow(g, test, from, to) {
+    for (var r = from || 0; r < Math.min(g.length, to || g.length); r++) if (test(g[r] || [], r)) return r;
+    return -1;
+  }
+
+  function parseParams(g, warn) {
+    var out = { period: "", key: "", fx: { VND: 1 } };
+    g.forEach(function (row) {
+      var a = txt(row[0]);
+      if (/^K\u1ef3 b\u00e1o c\u00e1o$/i.test(a)) out.period = txt(row[1]);
+      if (/^[A-Z]{3}$/.test(a) && num(row[1]) > 0) out.fx[a] = num(row[1]);
+    });
+    var m = /T?(\d{1,2})\s*\/\s*(\d{4})/.exec(out.period);
+    if (m) out.key = m[2] + "-" + (m[1].length < 2 ? "0" : "") + m[1];
+    else warn.push("Kh\u00f4ng \u0111\u1ecdc \u0111\u01b0\u1ee3c k\u1ef3 b\u00e1o c\u00e1o \u1edf sheet Tham s\u1ed1 & t\u1ef7 gi\u00e1.");
+    return out;
+  }
+
+  function parseSummary(g, out, warn) {
+    var hA = findRow(g, function (row) { return txt(row[1]) === "K\u00eanh b\u00e1n" && row.some(function (c) { return txt(c) === "S\u1ed1 GD b\u00e1n"; }); });
+    var hB = findRow(g, function (row) { return txt(row[2]) === "C\u1ed5ng" && /^Acquirer/.test(txt(row[3])); });
+    if (hA < 0 || hB < 0) { warn.push("Sheet T\u1ed5ng h\u1ee3p kh\u00f4ng \u0111\u00fang m\u1eabu (thi\u1ebfu b\u1ea3ng theo k\u00eanh ho\u1eb7c theo c\u1ed5ng)."); return; }
+    var hdr = g[hA];
+    var cGD = findCol(hdr, "S\u1ed1 GD b\u00e1n"), cDS = findCol(hdr, "Doanh s\u1ed1 b\u00e1n"), cRV = findCol(hdr, "Ho\u00e0n + chargeback"), cFee = findCol(hdr, "T\u1ed5ng ph\u00ed");
+    for (var r = hA + 1; r < hB; r++) {
+      var row = g[r] || [], k = txt(row[1]);
+      if (!k) continue;
+      var rec = { name: k, gd: num(row[cGD]), ds: r0(num(row[cDS])), refund: r0(num(row[cRV])), fee: r0(num(row[cFee])) };
+      if (/^T\u1ed4NG/i.test(k)) out.total = rec; else out.channels.push(rec);
+    }
+    var hb = g[hB];
+    var c = { gd: findCol(hb, "S\u1ed1 GD b\u00e1n"), ds: findCol(hb, "Doanh s\u1ed1 b\u00e1n"), rgd: findCol(hb, "S\u1ed1 GD ho\u00e0n"), rv: findCol(hb, "Ho\u00e0n + chargeback"),
+      fee: findCol(hb, "T\u1ed5ng ph\u00ed"), tp: findCol(hb, "T+ b\u00ecnh qu\u00e2n"), late: findCol(hb, "S\u1ed1 \u0111\u1ee3t v\u1ec1 ch\u1eadm") };
+    var lastGate = "";
+    for (r = hB + 1; r < g.length; r++) {
+      row = g[r] || [];
+      if (/^NG\u01af\u1edcI L\u1eacP/i.test(txt(row[1]))) break;
+      var gate = txt(row[2]) || lastGate, acq = txt(row[3]);
+      if (!acq) continue;
+      lastGate = gate;
+      if (/^C\u1ed9ng c\u1ed5ng$/i.test(acq)) continue;
+      out.acq.push({ ch: txt(row[1]), gate: gate, acq: acq, gd: num(row[c.gd]), ds: r0(num(row[c.ds])), rgd: num(row[c.rgd]),
+        refund: r0(num(row[c.rv])), fee: r0(num(row[c.fee])), tplus: c.tp >= 0 && typeof row[c.tp] === "number" ? r2(row[c.tp]) : null,
+        late: c.late >= 0 ? num(row[c.late]) : 0 });
+    }
+    if (!out.total) warn.push("Kh\u00f4ng th\u1ea5y d\u00f2ng T\u1ed4NG TO\u00c0N M\u1ea0NG \u1edf sheet T\u1ed5ng h\u1ee3p.");
+  }
+
+  function parseDetail(name, g, fx, gateOf, out, warn) {
+    var h = findRow(g, function (row) {
+      return row.some(function (x) { return txt(x) === "S\u1ed1 GD b\u00e1n"; }) && row.some(function (x) { return txt(x) === "K\u00eanh b\u00e1n"; }) &&
+        row.some(function (x) { return /quy\u1ebft to\u00e1n/.test(txt(x)); });
+    }, 0, 80);
+    if (h < 0) return false;
+    var hd = g[h], col = {
+      ch: findCol(hd, "K\u00eanh b\u00e1n"), acq: findCol(hd, "Acquirer"), mech: findCol(hd, "C\u01a1 ch\u1ebf ph\u00ed"), brand: findCol(hd, "H\u00e3ng / ph\u01b0\u01a1ng th\u1ee9c"),
+      type: findCol(hd, "Lo\u1ea1i th\u1ebb / s\u1ea3n ph\u1ea9m"), scope: findCol(hd, "Ph\u1ea1m vi ph\u00e1t h\u00e0nh"), tcur: findCol(hd, "\u0110\u1ed3ng ti\u1ec1n GD"),
+      cur: findCol(hd, "\u0110\u1ed3ng ti\u1ec1n quy\u1ebft to\u00e1n"), gd: findCol(hd, "S\u1ed1 GD b\u00e1n"), ds: findCol(hd, "Doanh s\u1ed1 b\u00e1n"), rv: findCol(hd, "Gi\u00e1 tr\u1ecb ho\u00e0n"),
+      fee: findCol(hd, "T\u1ed5ng ph\u00ed"), ic: findCol(hd, "Ph\u00ed Interchange"), sch: findCol(hd, "Ph\u00ed Scheme"), mk: findCol(hd, "Ph\u00ed markup"),
+      hdt: findCol(hd, "Bi\u1ec3u ph\u00ed theo H\u0110"), hdv: findCol(hd, "Ph\u00ed theo H\u0110")
+    };
+    var miss = {}, rows = 0;
+    for (var r = h + 1; r < g.length; r++) {
+      var row = g[r] || [], a = txt(row[0]);
+      if (/^[C-F]\.\s/.test(a) || /^M\u00e3 \u0111\u1ee3t/.test(txt(row[2])) || (/^STT$/.test(a) && r > h)) break;
+      var acq = txt(row[col.acq]); if (!acq) continue;
+      var type = txt(row[col.type]), brand = txt(row[col.brand]);
+      if (/^(total|all)$/i.test(type) || /^(total|all)$/i.test(brand)) continue;   // summary rows (Visa ALL, Total\u2026)
+      var gd = num(row[col.gd]), ds = num(row[col.ds]), fee = num(row[col.fee]);
+      if (!gd && !ds && !fee) continue;
+      var cur = txt(row[col.cur]) || txt(row[col.tcur]) || "VND";
+      var rate = fx[cur];
+      if (!rate) { miss[cur] = 1; rate = 0; }
+      var v = function (ci) { return ci >= 0 && num(row[ci]) ? r0(num(row[ci]) * rate) : 0; };
+      var d = { s: name, g: gateOf[acq] || GATE[name] || name, k: txt(row[col.ch]), a: acq, m: txt(row[col.mech]), b: brand, t: type,
+        p: txt(row[col.scope]), c: cur, n: gd, v: r0(ds * rate), f: r0(fee * rate), r: v(col.rv) };
+      if (col.ic >= 0 && (num(row[col.ic]) || num(row[col.sch]) || num(row[col.mk]))) { d.i = v(col.ic); d.h = v(col.sch); d.u = v(col.mk); }
+      if (col.hdv >= 0 && typeof row[col.hdv] === "number") { d.d = r0(row[col.hdv] * rate); d.x = col.hdt >= 0 ? txt(row[col.hdt]) : ""; }
+      out.det.push(d); rows++;
+    }
+    Object.keys(miss).forEach(function (c) { warn.push("Sheet " + name + ": ch\u01b0a c\u00f3 t\u1ef7 gi\u00e1 " + c + " \u1edf sheet Tham s\u1ed1, c\u00e1c d\u00f2ng n\u00e0y t\u00ednh 0 VND."); });
+    return rows;
+  }
+
+  function parseVcbBin(g, out) {
+    var h = findRow(g, function (row) { return row.some(function (x) { return /^Ph\u00ed VCB th\u1ef1c tr\u1eeb \(g\u1ed3m VAT\)$/.test(txt(x)); }); }, 0, 20);
+    if (h >= 0) {
+      var hd = g[h], b = findCol(hd, "H\u00e3ng"), ds = hd.findIndex(function (x) { return txt(x) === "Doanh s\u1ed1 (VND)"; }),
+        ct = hd.findIndex(function (x) { return txt(x) === "Ph\u00ed % theo H\u0110 g\u1ed3m VAT"; }), ac = hd.findIndex(function (x) { return txt(x) === "Ph\u00ed VCB th\u1ef1c tr\u1eeb (g\u1ed3m VAT)"; }),
+        nb = hd.findIndex(function (x) { return txt(x) === "S\u1ed1 BIN"; }), gd = hd.findIndex(function (x) { return txt(x) === "S\u1ed1 GD"; });
+      for (var r = h + 1; r < h + 10 && r < g.length; r++) {
+        var row = g[r] || [], name = txt(row[b]);
+        if (!name || /^T\u1ed5ng/.test(name)) continue;
+        out.vcb.push({ brand: name, bins: num(row[nb]), gd: num(row[gd]), ds: r0(num(row[ds])), hd: r0(num(row[ct])), act: r0(num(row[ac])) });
+      }
+    }
+    out.binV = topBins(g, { bin: "BIN", bank: "Ng\u00e2n h\u00e0ng ph\u00e1t h\u00e0nh", brand: "H\u00e3ng Scheme", variant: "Payment Method Variant", cty: "Country",
+      gd: "S\u1ed1 GD b\u00e1n", ds: "Doanh s\u1ed1 (VND", share: "T\u1ef7 tr\u1ecdng doanh s\u1ed1", rate: "Ph\u00ed th\u1ebb \u00e1p d\u1ee5ng", grp: "Nh\u00f3m ph\u00e1t h\u00e0nh" });
+  }
+  function topBins(g, names) {
+    var hd = g[0] || [], col = {};
+    Object.keys(names).forEach(function (k) { col[k] = findCol(hd, names[k]); });
+    if (col.bin < 0 || col.ds < 0) return [];
+    var rows = [];
+    for (var r = 1; r < g.length; r++) {
+      var row = g[r] || []; if (!txt(row[col.bin])) continue;
+      var o = {}; Object.keys(col).forEach(function (k) { if (col[k] >= 0) o[k] = typeof row[col[k]] === "number" ? row[col[k]] : txt(row[col[k]]); });
+      rows.push(o);
+    }
+    rows.sort(function (x, y) { return num(y.ds) - num(x.ds); });
+    var brands = {};
+    rows.forEach(function (o) { var b = o.brand || "Kh\u00e1c"; var s = brands[b] || (brands[b] = { brand: b, bins: 0, gd: 0, ds: 0 }); s.bins++; s.gd += num(o.gd); s.ds += num(o.ds); });
+    return { top: rows.slice(0, 40).map(function (o) { ["share", "rate", "ic", "sch", "mk"].forEach(function (k) { if (typeof o[k] === "number") o[k] = Math.round(o[k] * 1e6) / 1e6; }); if (typeof o.ds === "number") o.ds = r2(o.ds); return o; }),
+      brands: Object.keys(brands).map(function (k) { brands[k].ds = r2(brands[k].ds); return brands[k]; }), count: rows.length };
+  }
+
+  function parseWorkbook(grids, fileName) {
+    var warn = [], names = Object.keys(grids);
+    var pname = names.filter(function (n) { return /^Tham s\u1ed1/i.test(n); })[0];
+    var sname = names.filter(function (n) { return /^T\u1ed5ng h\u1ee3p$/i.test(n.trim()); })[0];
+    if (!pname || !sname) throw new Error("File kh\u00f4ng c\u00f3 sheet 'T\u1ed5ng h\u1ee3p' v\u00e0 'Tham s\u1ed1 & t\u1ef7 gi\u00e1'. H\u00e3y th\u1ea3 file t\u1ed5ng h\u1ee3p thanh to\u00e1n th\u00e1ng (m\u1eabu AITS).");
+    var p = parseParams(grids[pname], warn);
+    var out = { key: p.key, period: p.period, file: fileName || "", fx: p.fx, channels: [], total: null, acq: [], det: [], vcb: [], binA: null, binV: null, sheets: [], warn: warn };
+    parseSummary(grids[sname], out, warn);
+    var gateOf = {}; out.acq.forEach(function (a) { gateOf[a.acq] = a.gate; });
+    names.forEach(function (n) {
+      if (SKIP.test(n)) return;
+      if (/Adyen acquiring Card BIN/i.test(n)) {
+        out.binA = topBins(grids[n], { bin: "BIN", bank: "Ng\u00e2n h\u00e0ng ph\u00e1t h\u00e0nh", brand: "H\u00e3ng Scheme", variant: "Payment Method Variant", cty: "Country",
+          gd: "S\u1ed1 GD", ds: "Doanh s\u1ed1 (USD)", share: "T\u1ef7 tr\u1ecdng doanh s\u1ed1", ic: "Interchange BQ", sch: "Scheme fee BQ", mk: "Markup BQ" });
+        return;
+      }
+      if (/VCB acquiring Card BIN/i.test(n)) { parseVcbBin(grids[n], out); return; }
+      var k = parseDetail(n, grids[n], p.fx, gateOf, out, warn);
+      if (k !== false) out.sheets.push({ name: n, rows: k });
+    });
+    if (!out.det.length) warn.push("Kh\u00f4ng \u0111\u1ecdc \u0111\u01b0\u1ee3c d\u00f2ng chi ti\u1ebft n\u00e0o t\u1eeb c\u00e1c sheet c\u1ed5ng thanh to\u00e1n.");
+    return out;
+  }
+
+  var api = { parseWorkbook: parseWorkbook };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.FeeParser = api;
+})(this);
+
+</script>
+<script>
+(function () {
+"use strict";
+var S = { saved: {}, temp: {}, cur: null, prev: null, db: null, assets: null, dl: null, canWrite: null, dbState: "loading", jobs: [],
+  files: {}, tempFiles: {}, folders: {}, termO: {}, ups: [], upMonth: null, delKey: null, delFile: null, caps: null };
+var $ = function (s, el) { return (el || document).querySelector(s); };
+var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+var nf = function (x, d) { return (x || 0).toLocaleString("vi-VN", { maximumFractionDigits: d == null ? 0 : d, minimumFractionDigits: d || 0 }); };
+function money(v) {
+  var a = Math.abs(v || 0);
+  if (a >= 1e9) return nf(v / 1e9, 2) + " tỷ";
+  if (a >= 1e6) return nf(v / 1e6, 1) + " tr";
+  return nf(v);
+}
+function pct(x, d) { return x == null || !isFinite(x) ? "—" : nf(x * 100, d == null ? 2 : d) + "%"; }
+function rate(f, v) { return v ? f / v : null; }
+function rateChip(r) {
+  if (r == null) return '<span class="chip c-mute">—</span>';
+  var c = r < 0.012 ? ["c-good", "Thấp"] : r < 0.025 ? ["c-info", "Trung bình"] : r < 0.035 ? ["c-warn", "Cao"] : ["c-crit", "Rất cao"];
+  return '<span class="chip ' + c[0] + '" title="' + c[1] + '">' + pct(r) + "</span>";
+}
+function monthLabel(k) { var m = /^(\d{4})-(\d{2})$/.exec(k || ""); return m ? "T" + (+m[2]) + "/" + m[1] : k; }
+function yymm(k) { var m = /^(\d{4})-(\d{2})$/.exec(k || ""); return m ? m[1].slice(2) + m[2] : ""; }
+function allMonths() {
+  var o = {}; Object.keys(S.saved).forEach(function (k) { o[k] = S.saved[k]; }); Object.keys(S.temp).forEach(function (k) { if (!o[k]) o[k] = S.temp[k]; });
+  return o;
+}
+function M() { return allMonths()[S.cur] || null; }
+function P() { return S.prev ? allMonths()[S.prev] || null : null; }
+function toast(t) { var d = document.createElement("div"); d.className = "toast"; d.setAttribute("role", "status"); d.textContent = t; document.body.appendChild(d); setTimeout(function () { d.remove(); }, 3600); }
+function store(k, v) { try { localStorage.setItem("sophi." + k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem("sophi." + k); } catch (e) { return null; } }
+function txt(v) { return v == null ? "" : String(v).replace(/\s+/g, " ").trim(); }
+function rid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function sum(a, f) { return a.reduce(function (s, x) { return s + (x[f] || 0); }, 0); }
+function fmtSize(b) { return b >= 1048576 ? nf(b / 1048576, 1) + " MB" : nf(Math.max(1, Math.round((b || 0) / 1024))) + " KB"; }
+function fmtD(s) { if (s == null) return "—"; var d = new Date((s - 25569) * 864e5); return ("0" + d.getUTCDate()).slice(-2) + "/" + ("0" + (d.getUTCMonth() + 1)).slice(-2) + "/" + d.getUTCFullYear(); }
+function errMsg(e) {
+  var c = e && e.code;
+  if (c === "too_large") return "File quá lớn (tối đa khoảng 14 MB cho Excel, 20 MB cho .md/.csv).";
+  if (c === "quota_or_state" || c === "quota_exceeded") return "Bộ nhớ của trang đã đầy, hãy xoá bớt file cũ.";
+  if (c === "invalid_argument" || c === "not_granted") return "Bạn chưa có quyền lưu vào sổ này.";
+  if (c === "unsupported_type") return "Định dạng file không lưu được.";
+  if (c === "rate_limited" || c === "resource_exhausted") return "Đang gửi quá nhiều, thử lại sau ít phút.";
+  return (e && e.message) || "Chưa lưu được, thử lại sau.";
+}
+
+/* ------------------------------------------------------------------ channels: ECOM / BSP */
+function chan() { var v = load("chan"); return v === "ECOM" || v === "BSP" ? v : ""; }
+function setChan(v) { store("chan", v || ""); renderAll(); }
+/* gate names shown on the page; the summary workbook calls the "Other BSP" gate "Tổ chức thẻ BSP" */
+var GATE_RENAME = { "Tổ chức thẻ BSP": "AMEX BSP" };
+function normMonth(m) {
+  if (!m) return m;
+  var o = {}; Object.keys(m).forEach(function (k) { o[k] = m[k]; });
+  o.acq = (m.acq || []).map(function (a) { if (!GATE_RENAME[a.gate]) return a; var x = {}; Object.keys(a).forEach(function (k) { x[k] = a[k]; }); x.gate = GATE_RENAME[a.gate]; return x; });
+  o.det = (m.det || []).map(function (d) { if (!GATE_RENAME[d.g]) return d; var x = {}; Object.keys(d).forEach(function (k) { x[k] = d[k]; }); x.g = GATE_RENAME[d.g]; return x; });
+  return o;
+}
+function chOf(ch, gate) { return /^bsp$/i.test(txt(ch)) || /bsp|uatp/i.test(gate || "") ? "BSP" : "ECOM"; }
+function inCh(ch, gate) { var c = chan(); return !c || chOf(ch, gate) === c; }
+function acqF(a) { return inCh(a.ch, a.gate); }
+function detF(d) { return inCh(d.k, d.g); }
+function chanLabel() { var c = chan(); return c ? "kênh " + c : "toàn mạng"; }
+function chOfAcqName(m, name) {
+  var a = ((m && m.acq) || []).filter(function (x) { return x.acq === name; })[0];
+  if (a) return chOf(a.ch, a.gate);
+  return /worldpay|bsp|uatp|accelya|payone|jcb|uc card|atcan|iata/i.test(name || "") ? "BSP" : "ECOM";
+}
+function sumCh(list) { return list.reduce(function (s, x) { s.gd += x.gd || 0; s.ds += x.ds || 0; s.fee += x.fee || 0; s.refund += x.refund || 0; return s; }, { gd: 0, ds: 0, fee: 0, refund: 0 }); }
+function totOf(m) {
+  if (!m) return null;
+  var c = chan();
+  if (!c) return m.total || sumCh(m.channels || []);
+  return sumCh((m.channels || []).filter(function (x) { return chOf(x.name) === c; }));
+}
+
+/* acquirer list per channel, following the folders in ContractMD (id, name, folder, note, default acquirer name in the summary file) */
+var ACQ = {
+  ECOM: [["adyen", "Adyen", "adyen", "Thẻ, gateway, LPM, Ấn Độ", "Adyen All markets"], ["2c2p", "2C2P", "2c2p", "", "2C2P – 6 thị trường châu Á"],
+    ["paypal", "PayPal", "Paypal", "", "PayPal"], ["amex-ecom", "AMEX", "AMEX", "Amex online", "American Express"], ["vcb", "VCB", "VCB", "HĐ 052009, 072017", "VCB (acquirer)"],
+    ["vnpay", "VNPay", "VNPay", "", "VNPay QR và QRCredit"], ["napas", "NAPAS", "Napas", "PayNow, PayLater", "NAPAS"], ["shopeepay", "ShopeePay", "ShopeePay", "", "ShopeePay"],
+    ["vietqr-mb", "VietQR MB", "VietQR MB", "", "MBBank – VietQR"], ["momo", "MoMo", "MoMo", "", "MoMo"], ["kcp", "KCP Korea", "KCP Korea", "", "KCP"],
+    ["ecom-khac", "Khác", "Khac", "Cổng chưa có trong danh sách", ""]],
+  BSP: [["worldpay", "Worldpay", "worldpay", "BSP Agency Sales", "Worldpay"], ["amex-bsp", "AMEX BSP", "AMEX", "Worldwide Agreement 2024", "American Express (BSP)"],
+    ["accelya", "Accelya", "accelya", "Vivaldi / BECM", "Accelya"], ["payone", "Payone", "payone", "IC++ 2019", "Payone"], ["jcb-jp", "JCB JP", "JCB JP", "", "JCB International (BSP)"],
+    ["uc-card-jp", "UC Card JP", "UC Card JP", "", "UC Card"], ["bsp-khac", "Khác", "Khac", "UATP, Diners…", ""]]
+};
+function acqInfo(sec, id) {
+  var a = (ACQ[sec] || []).filter(function (x) { return x[0] === id; })[0];
+  return a ? { id: a[0], name: a[1], folder: a[2], note: a[3], def: a[4] } : { id: id || "", name: id || "", folder: id || "Khac", note: "", def: "" };
+}
+var SEC_NAME = { "TONG HOP": "Tổng hợp", "BANK STATEMENT": "BANK STATEMENT", ECOM: "ECOM", BSP: "BSP" };
+
+/* ------------------------------------------------------------------ settlement batches and contract T+ rules */
+function ser(y, mo, d) { if (!(mo >= 1 && mo <= 12 && d >= 1 && d <= 31)) return null; return Date.UTC(y, mo - 1, d) / 864e5 + 25569; }
+function toSerial(v) {
+  if (v == null || v === "") return null;
+  if (typeof v === "number") return v > 20000 && v < 90000 ? Math.floor(v) : null;
+  if (v instanceof Date) return ser(v.getFullYear(), v.getMonth() + 1, v.getDate());
+  var s = txt(v), m;
+  if ((m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s))) return ser(+m[1], +m[2], +m[3]);
+  if ((m = /^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/.exec(s))) return ser(+m[3], +m[2], +m[1]);
+  if (/^\d{5}(\.\d+)?$/.test(s)) return toSerial(+s);
+  return null;
+}
+var HCOL = [
+  ["arr", /tiền về|payout date|value date|credit date|báo có|ghi có|nhận tiền/i],
+  ["from", /ngày gd từ|từ ngày|from date|start date|period start/i],
+  ["to", /ngày gd đến|đến ngày|to date|end date|period end|ngày giao dịch|transaction date|sales date|capture date|booking date/i],
+  ["ref", /mã đợt|tham chiếu|batch|payout ref|payout id|reference/i],
+  ["cur", /^(đồng tiền|currency|tiền tệ|ccy|loại tiền)/i],
+  ["acq", /^acquirer|nhà cung cấp|merchant account/i],
+  ["meth", /phương thức|payment method/i]
+];
+function hdrCols(row) {
+  var c = {};
+  (row || []).forEach(function (v, i) {
+    var s = txt(v); if (!s) return;
+    for (var k = 0; k < HCOL.length; k++) { var key = HCOL[k][0]; if (c[key] == null && HCOL[k][1].test(s)) { c[key] = i; break; } }
+  });
+  return c;
+}
+function rowsToBatches(g, h, c, defA, out, stopAtSection) {
+  var blank = 0;
+  for (var r = h + 1; r < g.length && out.length < 3000; r++) {
+    var x = g[r] || [];
+    if (stopAtSection && (/^[A-H]\.\s/.test(txt(x[0])) || /^STT$/i.test(txt(x[0])))) break;
+    var a = c.acq != null ? txt(x[c.acq]) : defA;
+    var f = c.from != null ? toSerial(x[c.from]) : null, t = c.to != null ? toSerial(x[c.to]) : null, rr = c.arr != null ? toSerial(x[c.arr]) : null;
+    if (t == null) t = f; if (f == null) f = t;
+    if (!a || t == null) { if (++blank > 30) break; continue; }
+    blank = 0;
+    out.push([a.slice(0, 80), c.ref != null ? txt(x[c.ref]).slice(0, 60) : "", c.cur != null ? txt(x[c.cur]).toUpperCase().slice(0, 3) : "", f, t, rr, c.meth != null ? txt(x[c.meth]).slice(0, 40) : ""]);
+  }
+}
+/* batches in section D ("Đối chiếu ngày GD – ngày tiền về") of each gateway sheet of the AITS summary workbook */
+function parseBatches(grids) {
+  var out = [];
+  Object.keys(grids).forEach(function (n) {
+    if (/^(Ghi chú|Tổng hợp|Tham số)/i.test(n)) return;
+    var g = grids[n];
+    for (var h = 0; h < g.length; h++) {
+      if (!/^Mã đợt/i.test(txt((g[h] || [])[2]))) continue;
+      var c = hdrCols(g[h]);
+      if (c.acq != null && c.arr != null) rowsToBatches(g, h, c, "", out, true);
+    }
+  });
+  return out;
+}
+/* any uploaded sheet with a "date money arrived" column plus a transaction date column */
+function genericBatches(grids, defA) {
+  var out = [];
+  Object.keys(grids).forEach(function (n) {
+    var g = grids[n];
+    for (var h = 0; h < Math.min(g.length, 80); h++) {
+      var c = hdrCols(g[h]);
+      if (c.arr != null && (c.to != null || c.from != null) && (c.acq != null || defA)) { rowsToBatches(g, h, c, defA, out, /^Mã đợt/i.test(txt((g[h] || [])[2]))); break; }
+    }
+  });
+  return out;
+}
+/* section D of "Tham số & tỷ giá": contract settlement cycle per acquirer and holidays */
+function parseTerms(grids) {
+  var n = Object.keys(grids).filter(function (k) { return /^Tham số/i.test(k); })[0], res = { terms: [], hol: [] };
+  if (!n) return res;
+  var g = grids[n], h = -1;
+  for (var i = 0; i < g.length; i++) { var x = g[i] || []; if (/^Acquirer/i.test(txt(x[0])) && /T\+/.test(txt(x[2]))) { h = i; break; } }
+  if (h < 0) return res;
+  for (var r = h + 1; r < g.length; r++) {
+    var y = g[r] || [], a = txt(y[0]), hd = toSerial(y[4]);
+    if (hd) res.hol.push(hd);
+    if (!a || /^Đã điền|^Ghi chú/i.test(a)) continue;
+    var d = typeof y[2] === "number" ? y[2] : (/^\d+$/.test(txt(y[2])) ? +txt(y[2]) : null);
+    res.terms.push([a.slice(0, 80), /NLV/i.test(txt(y[1])) ? 1 : 0, d, txt(y[3]).slice(0, 300)]);
+  }
+  return res;
+}
+var CUR6 = ["EUR", "JPY", "AUD", "GBP", "USD", "VND"];
+var B_ADY = "MA card acquiring 2025 cl. 5: settle theo sales day (Sales Day Payout, Schedule 6). Bản tóm tắt HĐ chưa ghi số ngày; mặc định T+2 theo ví dụ Payout Day của Schedule 6, cần xác nhận trên Customer Area.";
+var B_VCB = "HĐ 072017 PL1 Đ2, PL2 mục 3.4: VCB tạm ứng ngay trong ngày nhận dữ liệu thanh toán từ MiGS, bằng đúng đồng tiền giao dịch (VND, USD, EUR, AUD, GBP, JPY). Mặc định T+1 ngày làm việc.";
+var B_LPM = "MA LPM 2026 và Addendum Additional LPM (27/08/2026) mục 3: Sales Day Payout, Payout Day mẫu T+2.";
+var B_IN = "VNA IN AMA cl. 2.3: Adyen India settle 1 ngày làm việc sau Delivery Intimation, muộn nhất 5 ngày làm việc sau capture, tức T+6 ngày làm việc.";
+function defaultTerms() {
+  var t = [];
+  CUR6.forEach(function (c) { t.push({ id: "ady-" + c, sec: 1, acq: "Adyen All markets", cur: c, d: 2, n: true, b: B_ADY, conf: 1 }); });
+  t.push({ id: "ady-lm", sec: 1, acq: "Adyen – Lotusmiles", cur: "", d: 2, n: true, b: B_ADY, conf: 1 });
+  t.push({ id: "ady-ev", sec: 1, acq: "Adyen – Evoucher", cur: "", d: 2, n: true, b: B_ADY, conf: 1 });
+  CUR6.forEach(function (c) { t.push({ id: "vcb-" + c, sec: 2, acq: "VCB", cur: c, d: 1, n: true, b: B_VCB, conf: 1 }); });
+  t.push({ id: "lpm-cn", sec: 3, acq: "Adyen – LPM Trung Quốc", cur: "", d: 2, n: true, b: B_LPM, conf: 1 });
+  t.push({ id: "lpm-jp", sec: 3, acq: "Adyen – LPM EU và Nhật", cur: "", d: 2, n: true, b: B_LPM, conf: 1 });
+  t.push({ id: "ady-in", sec: 3, acq: "Adyen India", cur: "", d: 6, n: true, b: B_IN });
+  return t;
+}
+function termsList(m) {
+  var list = defaultTerms(), seen = {};
+  list.forEach(function (r) { seen[r.acq + "|" + r.cur] = 1; r.src = "Hợp đồng"; });
+  ((m && m.terms) || []).forEach(function (t) {
+    if (seen[t[0] + "|"]) return;
+    list.push({ id: "wb:" + t[0], sec: 4, acq: t[0], cur: "", d: t[2], n: !!t[1], b: t[3] || "", src: "File tổng hợp" });
+  });
+  list.forEach(function (r) { var o = S.termO[r.id]; if (o) { if (o.d !== undefined) r.d = o.d; if (o.n !== undefined) r.n = !!o.n; r.edited = 1; } });
+  return list;
+}
+function findRule(list, a, c) {
+  var best = null, bs = -1; a = a || "";
+  list.forEach(function (r) {
+    var ok = a === r.acq || (a.indexOf(r.acq) === 0 && /[\s(–-]/.test(a.charAt(r.acq.length)));
+    if (!ok || (r.cur && r.cur !== c)) return;
+    var s = (a === r.acq ? 1000 : 0) + (r.cur ? 100 : 0) + r.acq.length;
+    if (s > bs) { bs = s; best = r; }
+  });
+  return best;
+}
+function dow(s) { return (((s - 25569) % 7) + 7 + 4) % 7; }
+function isOff(s, hol) { var d = dow(s); return d === 0 || d === 6 || !!(hol && hol[s]); }
+function tPlus(t, r, nlv, hol) {
+  if (t == null || r == null) return null;
+  if (!nlv) return r - t;
+  var t0 = t; while (isOff(t0, hol) && t0 < r) t0++;
+  var n = 0; for (var d = t0 + 1; d <= r; d++) if (!isOff(d, hol)) n++;
+  return n;
+}
+function holSet(m) { var o = {}; ((m && m.hol) || []).forEach(function (s) { o[s] = 1; }); return o; }
+function bObj(b, src) { return { a: b[0], ref: b[1], c: b[2], f: b[3], t: b[4], r: b[5], m: b[6] || "", src: src }; }
+function batchesOf(mk) {
+  var out = [], seen = {}, mm = allMonths()[mk];
+  function add(b, src) { var k = b[0] + "|" + b[1] + "|" + b[2] + "|" + b[4]; if (seen[k]) return; seen[k] = 1; out.push(bObj(b, src)); }
+  ((mm && mm.batches) || []).forEach(function (b) { add(b, "File tổng hợp"); });
+  filesOf(mk).forEach(function (f) { (f.b || []).forEach(function (b) { add(b, f.name); }); });
+  return out;
+}
+function evalB(b, list, hol) {
+  var e = {}; Object.keys(b).forEach(function (k) { e[k] = b[k]; });
+  var r = findRule(list, b.a, b.c); e.rule = r;
+  if (b.r == null) { e.st = "pend"; return e; }
+  e.tp = tPlus(b.t, b.r, r ? r.n : true, hol);
+  if (!r || r.d == null) { e.st = "nc"; return e; }
+  e.late = e.tp - r.d; e.st = e.late > 0 ? "late" : "ok";
+  return e;
+}
+function reconOf(m) { if (!m) return []; var list = termsList(m), hol = holSet(m); return batchesOf(m.key).map(function (b) { return evalB(b, list, hol); }); }
+function bstats(bs) {
+  var s = { n: bs.length, ok: 0, late: 0, nc: 0, pend: 0, avg: null, max: null, maxLate: 0 }, ev = bs.filter(function (e) { return e.tp != null; });
+  bs.forEach(function (e) { s[e.st] = (s[e.st] || 0) + 1; if (e.st === "late") s.maxLate = Math.max(s.maxLate, e.late); });
+  if (ev.length) { s.avg = sum(ev, "tp") / ev.length; s.max = Math.max.apply(null, ev.map(function (e) { return e.tp; })); }
+  return s;
+}
+function stChip(s) {
+  if (!s.n) return '<span class="chip c-mute">Chưa có dữ liệu đợt chi trả</span>';
+  if (s.late) return '<span class="chip c-crit">' + s.late + " đợt chậm, tối đa " + s.maxLate + " ngày</span>";
+  if (s.ok) return '<span class="chip c-good">Đúng hạn' + (s.pend ? ", " + s.pend + " đợt chưa thấy tiền về" : "") + "</span>";
+  if (s.pend === s.n) return '<span class="chip c-warn">Chưa thấy tiền về</span>';
+  return '<span class="chip c-warn">Chưa có chu kỳ HĐ</span>';
+}
+function bChip(e) {
+  if (e.st === "ok") return '<span class="chip c-good">Đúng hạn</span>';
+  if (e.st === "late") return '<span class="chip c-crit">Chậm ' + e.late + " ngày</span>";
+  if (e.st === "pend") return '<span class="chip c-warn">Chưa thấy tiền về</span>';
+  return '<span class="chip c-mute">Chưa có chu kỳ HĐ</span>';
+}
+function ruleTxt(r) { return r && r.d != null ? "T+" + r.d + (r.n ? " NLV" : " ngày lịch") : "—"; }
+
+/* ------------------------------------------------------------------ grouping helpers */
+function method(d) {
+  var b = (d.b + " " + d.t).toLowerCase();
+  if (/trả sau|paylater|bnpl/.test(b)) return "Mua trước trả sau";
+  if (/ví|paypal|alipay|wechat|momo|shopee|zalo|kakao|grabpay/.test(b)) return "Ví điện tử";
+  if (/upi|qr|chuyển khoản|bank transfer|sofort|vietqr|konbini|cửa hàng/.test(b)) return "Chuyển khoản / QR";
+  if (/visa|master|amex|american|jcb|unionpay|rupay|diners|thẻ|uatp/.test(b)) return "Thẻ";
+  if (/vnpay/.test(b)) return "Ví điện tử";
+  return "Khác";
+}
+function brandName(d) {
+  var b = d.b;
+  if (/^Ví PayPal/i.test(b)) return "PayPal";
+  if (/^American Express$/i.test(b)) return "American Express";
+  return b;
+}
+function scope(d) {
+  var p = (d.p || "").toLowerCase();
+  if (/xuyên/.test(p)) return "Xuyên biên giới";
+  if (/nội địa|trong /.test(p)) return "Nội địa";
+  return "Không tách";
+}
+function agg(rows, keyFn) {
+  var o = {};
+  rows.forEach(function (d) {
+    var k = keyFn(d); var a = o[k] || (o[k] = { key: k, n: 0, v: 0, f: 0, r: 0, i: 0, h: 0, u: 0, icv: 0 });
+    a.n += d.n; a.v += d.v; a.f += d.f; a.r += d.r || 0;
+    if (d.i != null) { a.i += d.i; a.h += d.h; a.u += d.u; a.icv += d.v; }
+  });
+  return Object.keys(o).map(function (k) { return o[k]; });
+}
+function bars(items, opts) {
+  opts = opts || {};
+  var max = Math.max.apply(null, items.map(function (x) { return opts.val(x); }).concat([0])) || 1;
+  return '<div class="bars">' + items.map(function (x) {
+    var w = Math.max(0, opts.val(x) / max * 100);
+    return '<div class="bar-row"><span class="name" title="' + esc(opts.name(x)) + '">' + esc(opts.name(x)) + '</span><span class="bar-track" aria-hidden="true"><span class="bar-fill" style="width:' + w.toFixed(2) + '%"></span></span><span class="v">' + opts.label(x) + "</span></div>";
+  }).join("") + "</div>";
+}
+function delta(cur, prev, isRate) {
+  if (prev == null || cur == null || !isFinite(prev) || prev === 0) return "";
+  var d = isRate ? (cur - prev) * 10000 : (cur - prev) / Math.abs(prev) * 100;
+  var cls = d > 0 ? "up" : d < 0 ? "down" : "";
+  var t = isRate ? (d > 0 ? "+" : "") + nf(d, 1) + " điểm cơ bản" : (d > 0 ? "+" : "") + nf(d, 1) + "%";
+  return '<span class="' + (isRate ? cls : "") + '">' + t + "</span> so với " + esc(monthLabel(S.prev));
+}
+function table(cols, rows, extra) {
+  extra = extra || {};
+  return '<div class="tbl-wrap"><table><thead><tr>' + cols.map(function (c) { return '<th class="' + (c.n ? "n" : "") + '">' + c.h + "</th>"; }).join("") +
+    "</tr></thead><tbody>" + (rows.length ? rows.join("") : '<tr><td colspan="' + cols.length + '" class="note">Không có dòng nào.</td></tr>') + "</tbody>" + (extra.foot || "") + "</table></div>";
+}
+function emptyState(msg) {
+  return '<div class="empty"><strong>' + msg + '</strong><span>Thả file tổng hợp thanh toán tháng ở trang Tải file để bắt đầu.</span><a class="btn primary" href="#tai-len">Mở trang Tải file</a></div>';
+}
+function kpiRow(k) { return '<div class="kpis">' + k.map(function (x) { return '<div class="kpi"><span class="lab">' + x[0] + '</span><span class="val">' + x[1] + '</span><span class="delta">' + (x[2] || "&nbsp;") + "</span></div>"; }).join("") + "</div>"; }
+
+/* ------------------------------------------------------------------ views */
+function vOverview() {
+  var m = M(), p = P(), el = $("#v-tong-quan");
+  if (!m) { el.innerHTML = emptyState(S.dbState === "loading" ? "Đang tải các kỳ đã lưu…" : "Chưa có kỳ nào trong sổ"); return; }
+  var t = totOf(m), pt = p && totOf(p), c = chan();
+  var kp = [
+    ["Doanh số bán", money(t.ds) + " <small>VND</small>", delta(t.ds, pt && pt.ds)],
+    ["Tổng phí", money(t.fee) + " <small>VND</small>", delta(t.fee, pt && pt.fee)],
+    ["Tỷ lệ phí bình quân", pct(rate(t.fee, t.ds)), delta(rate(t.fee, t.ds), pt && rate(pt.fee, pt.ds), true)],
+    ["Số GD bán", nf(t.gd), delta(t.gd, pt && pt.gd)],
+    ["Hoàn + chargeback", money(t.refund) + " <small>VND</small>", pct(rate(t.refund, t.ds), 1) + " doanh số"]
+  ];
+  var gates = agg(m.acq.filter(acqF).map(function (a) { return { n: a.gd, v: a.ds, f: a.fee, r: a.refund, gate: a.gate }; }), function (d) { return d.gate; })
+    .filter(function (g) { return g.v > 0; }).sort(function (a, b) { return b.f - a.f; });
+  var meth = agg(m.det.filter(detF), method).sort(function (a, b) { return b.v - a.v; });
+  var html = '<div class="panel-head"><div><h2>Tổng quan kỳ ' + esc(monthLabel(m.key)) + " · " + chanLabel() + '</h2><p class="sub">Nguồn: ' + esc(m.file || "file tổng hợp") + (S.saved[m.key] ? "" : " · chưa lưu vào sổ") + "</p></div></div>";
+  html += kpiRow(kp);
+  html += '<div class="grid2"><div class="panel"><div><h3>Phí theo cổng thanh toán</h3><p class="sub">Tổng phí trong kỳ (VND) và tỷ lệ phí / doanh số.</p></div>' +
+    bars(gates, { name: function (g) { return g.key; }, val: function (g) { return g.f; }, label: function (g) { return money(g.f) + " · " + pct(rate(g.f, g.v)); } }) + "</div>";
+  html += '<div class="panel"><div><h3>Tỷ lệ phí theo phương thức</h3><p class="sub">Thẻ, ví điện tử, chuyển khoản / QR, mua trước trả sau.</p></div>' +
+    bars(meth, { name: function (g) { return g.key; }, val: function (g) { return rate(g.f, g.v) || 0; }, label: function (g) { return pct(rate(g.f, g.v)) + " · DS " + money(g.v); } }) +
+    table([{ h: "Phương thức" }, { h: "Số GD", n: 1 }, { h: "Doanh số", n: 1 }, { h: "Tỷ trọng", n: 1 }, { h: "Phí", n: 1 }],
+      meth.map(function (g) { return "<tr><td>" + esc(g.key) + '</td><td class="n">' + nf(g.n) + '</td><td class="n">' + money(g.v) + '</td><td class="n">' + pct(rate(g.v, t.ds), 1) + '</td><td class="n">' + money(g.f) + "</td></tr>"; })) + "</div></div>";
+  var chs = m.channels.filter(function (x) { return !c || chOf(x.name) === c; });
+  html += '<div class="panel"><div><h3>Theo kênh bán</h3></div>' + table([{ h: "Kênh bán" }, { h: "Thuộc" }, { h: "Số GD", n: 1 }, { h: "Doanh số (VND)", n: 1 }, { h: "Hoàn + CB", n: 1 }, { h: "Tổng phí", n: 1 }, { h: "Tỷ lệ phí", n: 1 }, { h: "Tỷ trọng DS", n: 1 }],
+    chs.map(function (x) { return "<tr><td>" + esc(x.name) + '</td><td><span class="sec-tag">' + chOf(x.name) + '</span></td><td class="n">' + nf(x.gd) + '</td><td class="n">' + nf(x.ds) + '</td><td class="n">' + nf(x.refund) + '</td><td class="n">' + nf(x.fee) + '</td><td class="n">' + rateChip(rate(x.fee, x.ds)) + '</td><td class="n">' + pct(rate(x.ds, t.ds), 1) + "</td></tr>"; }),
+    { foot: '<tfoot><tr class="tot"><td colspan="2">Tổng ' + chanLabel() + '</td><td class="n">' + nf(t.gd) + '</td><td class="n">' + nf(t.ds) + '</td><td class="n">' + nf(t.refund) + '</td><td class="n">' + nf(t.fee) + '</td><td class="n">' + pct(rate(t.fee, t.ds)) + '</td><td class="n">100%</td></tr></tfoot>' }) + "</div>";
+  html += trendPanel();
+  el.innerHTML = html;
+}
+function trendPanel() {
+  var ms = allMonths(), keys = Object.keys(ms).sort();
+  if (keys.length < 2) return '<div class="panel"><div><h3>Xu hướng theo tháng</h3><p class="sub">Cần ít nhất 2 kỳ trong sổ để vẽ xu hướng. Hiện có ' + keys.length + " kỳ.</p></div></div>";
+  var pts = keys.map(function (k) { var t = totOf(ms[k]) || {}; return { k: k, r: rate(t.fee, t.ds) || 0, f: t.fee || 0, v: t.ds || 0 }; });
+  var W = 640, H = 200, L = 52, R = 16, T = 14, B = 30;
+  var max = Math.max.apply(null, pts.map(function (p) { return p.r; })) * 1.15 || 0.01, min = 0;
+  var x = function (i) { return L + (W - L - R) * (pts.length === 1 ? 0.5 : i / (pts.length - 1)); }, y = function (v) { return T + (H - T - B) * (1 - (v - min) / (max - min)); };
+  var ticks = [0, max / 2, max];
+  var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Tỷ lệ phí bình quân theo tháng" style="width:100%;max-width:100%;height:auto">' +
+    ticks.map(function (v) { return '<line class="gridline" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '"/><text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + pct(v, 2) + "</text>"; }).join("") +
+    '<polyline class="trend-line" points="' + pts.map(function (p, i) { return x(i) + "," + y(p.r); }).join(" ") + '"/>' +
+    pts.map(function (p, i) { return '<circle class="trend-dot" r="' + (i === pts.length - 1 ? 4.5 : 3) + '" cx="' + x(i) + '" cy="' + y(p.r) + '"/><text x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="middle">' + esc(monthLabel(p.k)) + "</text>"; }).join("") + "</svg>";
+  return '<div class="panel"><div><h3>Xu hướng tỷ lệ phí bình quân · ' + chanLabel() + '</h3><p class="sub">Tổng phí / doanh số theo kỳ đã lưu.</p></div>' + svg +
+    table([{ h: "Kỳ" }, { h: "Doanh số", n: 1 }, { h: "Tổng phí", n: 1 }, { h: "Tỷ lệ", n: 1 }], pts.map(function (p) { return "<tr><td>" + esc(monthLabel(p.k)) + '</td><td class="n">' + money(p.v) + '</td><td class="n">' + money(p.f) + '</td><td class="n">' + pct(p.r) + "</td></tr>"; })) + "</div>";
+}
+function vGates() {
+  var m = M(), el = $("#v-cong");
+  if (!m) { el.innerHTML = emptyState("Chưa có dữ liệu kỳ này"); return; }
+  var ch = load("ch") || "", base = m.acq.filter(acqF);
+  var chs = Array.from(new Set(base.map(function (a) { return a.ch; }))).filter(Boolean);
+  if (ch && chs.indexOf(ch) < 0) ch = "";
+  var rows = base.filter(function (a) { return (!ch || a.ch === ch) && (a.gd || a.ds || a.fee); });
+  var tot = rows.reduce(function (s, a) { s.gd += a.gd; s.ds += a.ds; s.fee += a.fee; s.rf += a.refund; s.late += a.late || 0; return s; }, { gd: 0, ds: 0, fee: 0, rf: 0, late: 0 });
+  var byGate = {}; rows.forEach(function (a) { (byGate[a.gate] = byGate[a.gate] || []).push(a); });
+  var gates = Object.keys(byGate).sort(function (a, b) { return sum(byGate[b], "ds") - sum(byGate[a], "ds"); });
+  var pa = P(), prevRate = {};
+  if (pa) pa.acq.forEach(function (a) { prevRate[a.gate + "|" + a.acq] = rate(a.fee, a.ds); });
+  var body = [];
+  gates.forEach(function (g) {
+    var list = byGate[g].sort(function (a, b) { return b.ds - a.ds; }), gd = sum(list, "gd"), ds = sum(list, "ds"), fee = sum(list, "fee");
+    body.push('<tr class="grp"><td colspan="2">' + esc(g) + ' <span class="sec-tag">' + chOf(list[0].ch, g) + '</span></td><td class="n">' + nf(gd) + '</td><td class="n">' + money(ds) + '</td><td class="n">' + money(fee) + '</td><td class="n">' + pct(rate(fee, ds)) + '</td><td class="n">' + pct(rate(ds, tot.ds), 1) + '</td><td></td><td></td><td></td></tr>');
+    list.forEach(function (a) {
+      var pr = prevRate[a.gate + "|" + a.acq], r = rate(a.fee, a.ds), dd = pr != null && r != null ? (r - pr) * 10000 : null;
+      body.push("<tr><td>" + esc(a.acq) + '</td><td class="note">' + esc(a.ch) + '</td><td class="n">' + nf(a.gd) + '</td><td class="n">' + money(a.ds) + '</td><td class="n">' + money(a.fee) + '</td><td class="n">' + rateChip(r) + '</td><td class="n">' + pct(rate(a.ds, tot.ds), 1) +
+        '</td><td class="n">' + (dd == null ? "—" : '<span class="' + (dd > 0 ? "up" : dd < 0 ? "down" : "") + '">' + (dd > 0 ? "+" : "") + nf(dd, 1) + "</span>") + '</td><td class="n">' + (a.tplus == null ? "—" : nf(a.tplus, 1)) + '</td><td class="n">' + (a.late ? '<span class="chip c-warn">' + a.late + "</span>" : "0") + "</td></tr>");
+    });
+  });
+  el.innerHTML = '<div class="panel"><div class="panel-head"><div><h2>Cổng &amp; acquirer · ' + esc(monthLabel(m.key)) + " · " + chanLabel() + '</h2><p class="sub">Số liệu từ sheet Tổng hợp. Chip màu theo tỷ lệ phí: dưới 1,2% thấp, 1,2–2,5% trung bình, 2,5–3,5% cao, trên 3,5% rất cao.</p></div>' +
+    '<div class="filters"><label for="f-ch" class="note">Kênh bán</label><select id="f-ch"><option value="">Tất cả kênh bán</option>' + chs.map(function (c) { return '<option' + (c === ch ? " selected" : "") + ">" + esc(c) + "</option>"; }).join("") + "</select></div></div>" +
+    table([{ h: "Acquirer / nhà cung cấp" }, { h: "Kênh bán" }, { h: "Số GD", n: 1 }, { h: "Doanh số", n: 1 }, { h: "Tổng phí", n: 1 }, { h: "Tỷ lệ phí", n: 1 }, { h: "Tỷ trọng DS", n: 1 }, { h: "Δ tỷ lệ (bps)", n: 1 }, { h: "T+ BQ", n: 1 }, { h: "Đợt chậm", n: 1 }], body,
+      { foot: '<tfoot><tr class="tot"><td colspan="2">Cộng</td><td class="n">' + nf(tot.gd) + '</td><td class="n">' + money(tot.ds) + '</td><td class="n">' + money(tot.fee) + '</td><td class="n">' + pct(rate(tot.fee, tot.ds)) + '</td><td class="n">100%</td><td></td><td></td><td class="n">' + tot.late + "</td></tr></tfoot>" }) +
+    '<p class="note">Δ tỷ lệ: chênh lệch tỷ lệ phí so với kỳ so sánh, tính bằng điểm cơ bản (1 bps = 0,01%). Số tiền rút gọn: tỷ = tỷ VND, tr = triệu VND.</p></div>';
+  $("#f-ch").onchange = function (e) { store("ch", e.target.value); vGates(); };
+}
+
+/* Hãng thẻ: filter bar with dropdowns (kênh, cổng, acquirer, phương thức, hãng, đồng tiền) applied to every table of the page */
+var HF = [["gate", "Cổng", function (d) { return d.g; }], ["acq", "Acquirer", function (d) { return d.a; }], ["meth", "Phương thức", method],
+  ["brand", "Hãng thẻ", brandName], ["scope", "Phạm vi phát hành", scope], ["cur", "Đồng tiền quyết toán", function (d) { return d.c; }]];
+function vBrands() {
+  var m = M(), el = $("#v-hang-the");
+  if (!m) { el.innerHTML = emptyState("Chưa có dữ liệu kỳ này"); return; }
+  var base = m.det.filter(detF), f = {};
+  HF.forEach(function (h) { f[h[0]] = load("hf." + h[0]) || ""; });
+  function pass(d, skip) { return HF.every(function (h) { return h[0] === skip || !f[h[0]] || h[2](d) === f[h[0]]; }); }
+  var opts = {};
+  HF.forEach(function (h) {
+    var o = {}; base.filter(function (d) { return pass(d, h[0]); }).forEach(function (d) { var k = h[2](d); if (k) o[k] = (o[k] || 0) + d.v; });
+    opts[h[0]] = Object.keys(o).sort(function (a, b) { return o[b] - o[a]; });
+    if (f[h[0]] && opts[h[0]].indexOf(f[h[0]]) < 0) opts[h[0]].unshift(f[h[0]]);
+  });
+  var rows = base.filter(function (d) { return pass(d); }), active = HF.filter(function (h) { return f[h[0]]; }).length + (chan() ? 1 : 0);
+  var tds = sum(rows, "v");
+  var bar = '<div class="panel"><div class="panel-head"><div><h2>Hãng thẻ &amp; phương thức · ' + esc(monthLabel(m.key)) + '</h2><p class="sub">Chọn trong các ô dưới đây để lọc toàn bộ trang. Danh sách trong mỗi ô chỉ hiện giá trị còn số liệu theo các ô đã chọn.</p></div>' +
+    '<button type="button" class="btn" id="hf-clear"' + (active ? "" : " disabled") + ">Xoá lọc</button></div>" +
+    '<div class="filterbar"><div class="field"><label for="hf-chan">Kênh</label><select id="hf-chan" data-chan-select><option value="">Tất cả kênh</option><option' + (chan() === "ECOM" ? " selected" : "") + ' value="ECOM">ECOM</option><option' + (chan() === "BSP" ? " selected" : "") + ' value="BSP">BSP</option></select></div>' +
+    HF.map(function (h) { return '<div class="field"><label for="hf-' + h[0] + '">' + h[1] + '</label><select id="hf-' + h[0] + '" data-hf="' + h[0] + '"><option value="">Tất cả</option>' + opts[h[0]].map(function (o) { return "<option" + (o === f[h[0]] ? " selected" : "") + ' value="' + esc(o) + '">' + esc(o) + "</option>"; }).join("") + "</select></div>"; }).join("") + "</div>" +
+    kpiRow([["Dòng chi tiết", nf(rows.length)], ["Số GD bán", nf(sum(rows, "n"))], ["Doanh số", money(tds) + " <small>VND</small>"], ["Tổng phí", money(sum(rows, "f")) + " <small>VND</small>"], ["Tỷ lệ phí", pct(rate(sum(rows, "f"), tds))]]) + "</div>";
+  var br = agg(rows, function (d) { return method(d) + "|" + brandName(d); }).sort(function (a, b) { return b.v - a.v; });
+  var rowsB = br.map(function (g) {
+    var k = g.key.split("|");
+    return "<tr><td>" + esc(k[1]) + '</td><td class="note">' + esc(k[0]) + '</td><td class="n">' + nf(g.n) + '</td><td class="n">' + money(g.v) + '</td><td class="n">' + pct(rate(g.v, tds), 1) + '</td><td class="n">' + money(g.f) + '</td><td class="n">' + rateChip(rate(g.f, g.v)) + '</td><td class="n">' + (g.icv ? pct(rate(g.i, g.icv)) : "—") + '</td><td class="n">' + (g.icv ? pct(rate(g.h, g.icv)) : "—") + '</td><td class="n">' + (g.icv ? pct(rate(g.u, g.icv)) : "—") + "</td></tr>";
+  });
+  var sc = agg(rows.filter(function (d) { return d.i != null; }), function (d) { return d.g + "|" + brandName(d) + "|" + scope(d); }).sort(function (a, b) { return a.key < b.key ? -1 : 1; });
+  var ty = agg(rows, function (d) { return d.g + "|" + brandName(d) + "|" + (d.t || "—"); }).sort(function (a, b) { return b.v - a.v; }).slice(0, 40);
+  el.innerHTML = bar + '<div class="panel"><div><h3>Theo hãng thẻ / phương thức</h3><p class="sub">Cộng từ các dòng chi tiết của từng sheet cổng (bỏ dòng tổng Visa ALL / Total). Interchange, Scheme, Markup chỉ có ở cổng tính phí IC++ (Adyen All markets, Adyen India, Worldpay) và tính trên doanh số của các dòng đó.</p></div>' +
+    table([{ h: "Hãng / phương thức" }, { h: "Nhóm" }, { h: "Số GD", n: 1 }, { h: "Doanh số", n: 1 }, { h: "Tỷ trọng", n: 1 }, { h: "Tổng phí", n: 1 }, { h: "Tỷ lệ phí", n: 1 }, { h: "Interchange", n: 1 }, { h: "Scheme", n: 1 }, { h: "Markup", n: 1 }], rowsB) + "</div>" +
+    '<div class="grid2"><div class="panel"><div><h3>Nội địa và xuyên biên giới (IC++)</h3><p class="sub">Thẻ phát hành cùng nước acquirer so với thẻ nước khác.</p></div>' +
+    table([{ h: "Cổng · hãng" }, { h: "Phạm vi" }, { h: "Doanh số", n: 1 }, { h: "Tỷ lệ phí", n: 1 }, { h: "IC", n: 1 }, { h: "Scheme", n: 1 }],
+      sc.map(function (g) { var k = g.key.split("|"); return "<tr><td>" + esc(k[0] + " · " + k[1]) + '</td><td><span class="chip ' + (k[2] === "Nội địa" ? "c-good" : k[2] === "Xuyên biên giới" ? "c-warn" : "c-mute") + '">' + esc(k[2]) + '</span></td><td class="n">' + money(g.v) + '</td><td class="n">' + pct(rate(g.f, g.v)) + '</td><td class="n">' + pct(rate(g.i, g.icv)) + '</td><td class="n">' + pct(rate(g.h, g.icv)) + "</td></tr>"; })) + "</div>" +
+    '<div class="panel"><div><h3>Loại thẻ / sản phẩm lớn nhất</h3><p class="sub">40 nhóm có doanh số cao nhất theo bộ lọc.</p></div>' +
+    table([{ h: "Loại thẻ" }, { h: "Hãng" }, { h: "Doanh số", n: 1 }, { h: "Tỷ lệ phí", n: 1 }, { h: "IC", n: 1 }],
+      ty.map(function (g) { var k = g.key.split("|"); return '<tr><td class="mono">' + esc(k[2]) + "</td><td>" + esc(k[1]) + '<div class="note">' + esc(k[0]) + '</div></td><td class="n">' + money(g.v) + '</td><td class="n">' + rateChip(rate(g.f, g.v)) + '</td><td class="n">' + (g.icv ? pct(rate(g.i, g.icv)) : "—") + "</td></tr>"; })) + "</div></div>";
+}
+$("#v-hang-the").addEventListener("change", function (e) {
+  var s = e.target;
+  if (s.dataset.hf) { store("hf." + s.dataset.hf, s.value); vBrands(); }
+  else if (s.hasAttribute("data-chan-select")) setChan(s.value);
+});
+$("#v-hang-the").addEventListener("click", function (e) {
+  if (e.target.id !== "hf-clear") return;
+  HF.forEach(function (h) { store("hf." + h[0], ""); }); setChan("");
+});
+
+/* ------------------------------------------------------------------ Đối soát phí: T+ settlement checks + fee vs contract */
+var LPM = [
+  { n: "UnionPay", mk: "Trung Quốc", acq: "Adyen – LPM Trung Quốc", re: /unionpay/i, r: 0.018, hd: "1,80%", src: "Addendum Additional LPM 27/08/2026", proc: 1 },
+  { n: "Alipay", mk: "Trung Quốc", acq: "Adyen – LPM Trung Quốc", re: /alipay/i, r: 0.013, hd: "1,30%", src: "Addendum Additional LPM 27/08/2026", proc: 1 },
+  { n: "WeChat Pay", mk: "Trung Quốc", acq: "Adyen – LPM Trung Quốc", re: /wechat/i, r: 0.012, hd: "1,20%", src: "Addendum Additional LPM 27/08/2026", proc: 1 },
+  { n: "Konbini (eContext)", mk: "Nhật Bản", acq: "Adyen – LPM EU và Nhật", re: /konbini|econtext/i, r: 0.017, jpy: 165, hd: "1,70% + JPY 165", src: "Addendum Additional LPM 27/08/2026", proc: 1 },
+  { n: "UPI", mk: "Ấn Độ", acq: "Adyen India", re: /^upi/i, r: 0.0036, hd: "0,36%", src: "Pricing Addendum India 08/2025" },
+  { n: "RuPay", mk: "Ấn Độ", acq: "Adyen India", re: /rupay/i, r: 0.025, hd: "2,5%", src: "Pricing Addendum India 08/2025" }
+];
+function isAdyCardAcq(a) { return /^Adyen (All markets|– Lotusmiles|– Evoucher)$/i.test(a || ""); }
+function isVcbAcq(a) { return /^VCB(\s|\(|–|$)/.test(a || ""); }
+function batchTable(bs) {
+  var show = bs.slice().sort(function (a, b) { return (b.st === "late") - (a.st === "late") || (a.t || 0) - (b.t || 0); }).slice(0, 300);
+  return table([{ h: "Acquirer" }, { h: "Mã đợt" }, { h: "Tiền" }, { h: "GD từ" }, { h: "GD đến" }, { h: "Tiền về" }, { h: "T+ HĐ" }, { h: "T+ thực tế", n: 1 }, { h: "Trạng thái" }, { h: "Nguồn" }],
+    show.map(function (e) { return "<tr><td>" + esc(e.a) + (e.m ? '<div class="note">' + esc(e.m) + "</div>" : "") + '</td><td class="mono">' + esc(e.ref || "—") + '</td><td class="mono">' + esc(e.c || "—") + '</td><td class="mono">' + fmtD(e.f) + '</td><td class="mono">' + fmtD(e.t) + '</td><td class="mono">' + fmtD(e.r) + "</td><td>" + ruleTxt(e.rule) + '</td><td class="n">' + (e.tp == null ? "—" : "T+" + e.tp) + "</td><td>" + bChip(e) + '</td><td class="note">' + esc(e.src) + "</td></tr>"; })) +
+    (bs.length > 300 ? '<p class="note">Hiện 300 / ' + nf(bs.length) + " đợt, ưu tiên các đợt chậm.</p>" : "");
+}
+function moreBatches(bs, label) { return bs.length ? '<details class="more"><summary>' + (label || "Xem " + nf(bs.length) + " đợt chi trả") + "</summary>" + batchTable(bs) + "</details>" : ""; }
+function curSection(m, all, list, o) {
+  var rows = CUR6.map(function (c) {
+    var dr = m.det.filter(function (d) { return o.test(d.a) && d.c === c; });
+    var bs = all.filter(function (e) { return o.test(e.a) && e.c === c; }), st = bstats(bs);
+    var rule = list.filter(function (r) { return r.id === o.pre + c; })[0];
+    return "<tr><td><b class=\"mono\">" + c + '</b></td><td class="n">' + nf(sum(dr, "n")) + '</td><td class="n">' + money(sum(dr, "v")) + '</td><td class="n">' + rateChip(rate(sum(dr, "f"), sum(dr, "v"))) + '</td><td style="white-space:nowrap">' + ruleTxt(rule) + (rule && rule.conf && !rule.edited ? '<span title="Số ngày mặc định, cần xác nhận" style="color:var(--color-warn)"> *</span>' : "") +
+      '</td><td class="n">' + nf(st.n) + '</td><td class="n">' + (st.avg == null ? "—" : "T+" + nf(st.avg, 1)) + '</td><td class="n">' + (st.max == null ? "—" : "T+" + st.max) + "</td><td>" + stChip(st) + "</td></tr>";
+  });
+  var bsAll = all.filter(function (e) { return o.test(e.a); });
+  return '<div class="panel"><div><h3><span class="sec-num">' + o.num + "</span>" + o.title + '</h3><p class="sub">' + o.sub + "</p></div>" +
+    table([{ h: "Đồng tiền TT" }, { h: "Số GD", n: 1 }, { h: "Doanh số (VND)", n: 1 }, { h: "Tỷ lệ phí", n: 1 }, { h: "T+ theo HĐ" }, { h: "Số đợt", n: 1 }, { h: "T+ BQ", n: 1 }, { h: "T+ cao nhất", n: 1 }, { h: "Đúng hạn?" }], rows) +
+    '<p class="note">NLV = ngày làm việc. <span style="color:var(--color-warn)">*</span> Số ngày mặc định từ bản tóm tắt HĐ, cần xác nhận với acquirer; sửa ở bảng "Chu kỳ T+ theo hợp đồng" cuối trang.</p>' + (o.extra || "") + moreBatches(bsAll) + "</div>";
+}
+function lpmSection(m, all, list) {
+  var fxJ = (m.fx && m.fx.JPY) || 0, fxU = (m.fx && m.fx.USD) || 0;
+  var lpmN = sum(m.det.filter(function (d) { return d.s === "Adyen LPM" && !/india/i.test(d.a); }), "n"), procUsd = lpmN > 50000 ? 0.08 : 0.09;
+  var rows = LPM.map(function (it) {
+    var dr = m.det.filter(function (d) { return d.a === it.acq && it.re.test(d.b + " " + d.t); });
+    var combined = dr.some(function (d) { return /alipay/i.test(d.b) && /wechat/i.test(d.b); });
+    var n = sum(dr, "n"), v = sum(dr, "v"), f = sum(dr, "f");
+    var exp = v * it.r + (it.jpy ? n * it.jpy * fxJ : 0) + (it.proc ? n * procUsd * fxU : 0);
+    var fc;
+    if (!v) fc = '<span class="chip c-mute">Không có giao dịch</span>';
+    else if (combined) fc = '<span class="chip c-info" title="File tổng hợp gộp Alipay và WeChat Pay trong một dòng">Gộp Alipay + WeChat</span>';
+    else { var d = (f - exp) / (exp || 1); fc = Math.abs(d) <= 0.005 ? '<span class="chip c-good">Khớp HĐ</span>' : d > 0 ? '<span class="chip c-crit">Thu vượt ' + pct(d, 1) + "</span>" : '<span class="chip c-info">Thấp hơn ' + pct(-d, 1) + "</span>"; }
+    var bs = all.filter(function (e) { return e.a === it.acq && (!e.m || it.re.test(e.m)); }), st = bstats(bs), rule = findRule(list, it.acq, "");
+    return "<tr><td><b>" + esc(it.n) + '</b><div class="note">' + esc(it.mk) + " · " + esc(it.acq) + '</div></td><td class="n">' + nf(n) + '</td><td class="n">' + money(v) + '</td><td class="n">' + pct(rate(f, v)) + '</td><td class="n">' + esc(it.hd) + (it.proc ? '<div class="note">+ USD ' + nf(procUsd, 2) + "/GD</div>" : "") +
+      '</td><td class="n">' + (v && !combined ? money(f - exp) : "—") + "</td><td>" + fc + "</td><td>" + ruleTxt(rule) + '</td><td class="n">' + nf(st.n) + '</td><td class="n">' + (st.max == null ? "—" : "T+" + st.max) + "</td><td>" + stChip(st) + "</td></tr>";
+  });
+  var bsAll = all.filter(function (e) { return LPM.some(function (it) { return e.a === it.acq; }); });
+  return '<div class="panel"><div><h3><span class="sec-num">3</span>Ví điện tử và phương thức địa phương (Adyen LPM)</h3><p class="sub">Phí HĐ: Addendum Additional LPM (UnionPay, Alipay, WeChat Pay, eContext/Konbini, áp dụng từ 01/05/2026) cộng phí xử lý Schedule 1 LPM; UPI, RuPay theo Pricing Addendum India. ' +
+    "Chu kỳ tiền về: LPM theo Sales Day Payout; Ấn Độ theo AMA India. Đợt chi trả Adyen là đợt gộp của cả tài khoản (vd Adyen India gồm thẻ, UPI và RuPay), trừ khi file tải lên có cột phương thức.</p></div>" +
+    table([{ h: "Phương thức" }, { h: "Số GD", n: 1 }, { h: "Doanh số (VND)", n: 1 }, { h: "Phí thực tế", n: 1 }, { h: "Phí theo HĐ", n: 1 }, { h: "Chênh lệch (VND)", n: 1 }, { h: "Đối chiếu phí" }, { h: "T+ theo HĐ" }, { h: "Số đợt", n: 1 }, { h: "T+ cao nhất", n: 1 }, { h: "Đúng hạn?" }], rows) +
+    '<p class="note">Chênh lệch = phí thực tế − (doanh số × % HĐ + phí cố định). Phí cố định JPY và USD quy VND theo tỷ giá sheet Tham số của kỳ.</p>' + moreBatches(bsAll) + "</div>";
+}
+function contractFeeHtml(m) {
+  var rows = m.det.filter(function (d) { return d.d != null && detF(d); });
+  function chip(act, hd) {
+    if (hd > 0 && act === 0) return '<span class="chip c-warn">Chưa bị thu</span>';
+    if (!hd) return '<span class="chip c-mute">—</span>';
+    var r = (act - hd) / hd;
+    if (Math.abs(r) <= 0.005 || Math.abs(act - hd) < 5000) return '<span class="chip c-good">Khớp HĐ</span>';
+    return r > 0 ? '<span class="chip c-crit">Thu vượt ' + pct(r, 1) + "</span>" : '<span class="chip c-info">Thấp hơn ' + pct(-r, 1) + "</span>";
+  }
+  var byG = {}; rows.forEach(function (d) { (byG[d.g] = byG[d.g] || []).push(d); });
+  var body = [], over = 0, n = 0;
+  Object.keys(byG).forEach(function (g) {
+    var l = byG[g], f = sum(l, "f"), hd = sum(l, "d");
+    body.push('<tr class="grp"><td colspan="3">' + esc(g) + '</td><td class="n">' + money(sum(l, "v")) + '</td><td class="n">' + nf(f) + '</td><td class="n">' + nf(hd) + '</td><td class="n">' + nf(f - hd) + "</td><td>" + chip(f, hd) + "</td></tr>");
+    l.forEach(function (d) {
+      n++; if (d.f - d.d > 0 && Math.abs(d.f - d.d) > Math.max(5000, d.d * 0.005)) over += d.f - d.d;
+      body.push("<tr><td>" + esc(d.a) + '<div class="note">' + esc([d.t, d.p].filter(Boolean).join(" · ")) + '</div></td><td class="note">' + esc(d.x || "") + '</td><td class="mono">' + esc(d.c) + '</td><td class="n">' + money(d.v) + '</td><td class="n">' + nf(d.f) + '</td><td class="n">' + nf(d.d) + '</td><td class="n">' + nf(d.f - d.d) + "</td><td>" + chip(d.f, d.d) + "</td></tr>");
+    });
+  });
+  var html = '<div class="panel"><div><h3><span class="sec-num">5</span>Phí thực thu so với hợp đồng · các cổng có cột "Phí theo HĐ"</h3><p class="sub">2C2P, PayPal, Amex BSP… Số tiền VND quy đổi; chênh lệch = thực thu − theo HĐ. Khớp: lệch không quá 0,5%.</p></div>';
+  if (!rows.length) html += '<p class="note">Kỳ này (theo kênh đang chọn) không có dòng nào có cột phí theo hợp đồng.</p>';
+  else html += kpiRow([["Dòng so sánh", nf(n)], ["Phí thực thu", money(sum(rows, "f"))], ["Phí theo HĐ", money(sum(rows, "d"))], ["Thu vượt HĐ", money(over), "cộng các dòng thu vượt"]]) +
+    table([{ h: "Acquirer · dòng" }, { h: "Biểu phí theo HĐ" }, { h: "Tiền QT" }, { h: "Doanh số", n: 1 }, { h: "Thực thu (VND)", n: 1 }, { h: "Theo HĐ (VND)", n: 1 }, { h: "Chênh lệch", n: 1 }, { h: "Đánh giá" }], body);
+  return html + "</div>";
+}
+function vcbFeeHtml(m) {
+  if (!m.vcb || !m.vcb.length) return "";
+  function chip(act, hd) { var r = hd ? (act - hd) / hd : 0; return Math.abs(r) <= 0.005 ? '<span class="chip c-good">Khớp HĐ</span>' : r > 0 ? '<span class="chip c-crit">Thu vượt ' + pct(r, 1) + "</span>" : '<span class="chip c-info">Thấp hơn ' + pct(-r, 1) + "</span>"; }
+  var tv = { ds: sum(m.vcb, "ds"), hd: sum(m.vcb, "hd"), act: sum(m.vcb, "act") };
+  return '<h3 style="margin-top:var(--sp-4)">Phí VCB so với HĐ 072017</h3><p class="sub" style="margin-top:0">Phí % theo HĐ gồm VAT 10% so với số VCB thực trừ trên sao kê (sheet VCB acquiring Card BIN List).</p>' +
+    table([{ h: "Hãng" }, { h: "Số BIN", n: 1 }, { h: "Số GD", n: 1 }, { h: "Doanh số", n: 1 }, { h: "Theo HĐ", n: 1 }, { h: "Thực trừ", n: 1 }, { h: "Tỷ lệ HĐ", n: 1 }, { h: "Tỷ lệ thực", n: 1 }, { h: "Đánh giá" }],
+      m.vcb.map(function (b) { return "<tr><td>" + esc(b.brand) + '</td><td class="n">' + nf(b.bins) + '</td><td class="n">' + nf(b.gd) + '</td><td class="n">' + money(b.ds) + '</td><td class="n">' + money(b.hd) + '</td><td class="n">' + money(b.act) + '</td><td class="n">' + pct(rate(b.hd, b.ds), 3) + '</td><td class="n">' + pct(rate(b.act, b.ds), 3) + "</td><td>" + chip(b.act, b.hd) + "</td></tr>"; }),
+      { foot: '<tfoot><tr class="tot"><td>Tổng</td><td></td><td></td><td class="n">' + money(tv.ds) + '</td><td class="n">' + money(tv.hd) + '</td><td class="n">' + money(tv.act) + '</td><td class="n">' + pct(rate(tv.hd, tv.ds), 3) + '</td><td class="n">' + pct(rate(tv.act, tv.ds), 3) + "</td><td>" + chip(tv.act, tv.hd) + "</td></tr></tfoot>" });
+}
+function termsPanel(list) {
+  var rows = list.map(function (r) {
+    return "<tr><td>" + esc(r.acq) + (r.cur ? ' <b class="mono">' + r.cur + "</b>" : "") + '</td><td><input type="number" min="0" max="60" step="1" aria-label="Số ngày T+ của ' + esc(r.acq + " " + r.cur) + '" data-term="' + esc(r.id) + '" data-k="d" value="' + (r.d == null ? "" : r.d) + '"></td>' +
+      '<td><select aria-label="Loại ngày" data-term="' + esc(r.id) + '" data-k="n" style="width:auto"><option value="1"' + (r.n ? " selected" : "") + '>Ngày làm việc</option><option value="0"' + (r.n ? "" : " selected") + ">Ngày lịch</option></select></td>" +
+      '<td class="note">' + esc(r.b) + "</td><td>" + (r.edited ? '<span class="chip c-info">Đã sửa</span>' : '<span class="chip c-mute">' + esc(r.src) + "</span>") + "</td></tr>";
+  });
+  var where = S.db ? (S.canWrite === false ? "Bạn chỉ có quyền xem, thay đổi chỉ lưu trên máy bạn." : "Lưu vào sổ, mọi người cùng dùng.") : "Đang mở ngoài claude.ai: thay đổi chỉ lưu trên máy bạn.";
+  return '<details class="card" id="terms-card"' + (load("terms-open") === "1" ? " open" : "") + '><summary>Chu kỳ T+ theo hợp đồng</summary><div class="card-body"><p class="sub" style="margin:0">Số ngày dùng để chấm đúng hạn. Ngày làm việc bỏ thứ Bảy, Chủ nhật và ngày nghỉ khai ở sheet Tham số; giao dịch ngày nghỉ tính từ ngày làm việc kế tiếp. ' + where + "</p>" +
+    table([{ h: "Acquirer · tiền" }, { h: "T+" }, { h: "Loại ngày" }, { h: "Căn cứ" }, { h: "Nguồn" }], rows) +
+    '<div class="actions"><button type="button" class="btn primary" id="terms-save">Lưu chu kỳ T+</button><button type="button" class="btn" id="terms-reset">Về mặc định</button><button type="button" class="btn" id="tpl-dl">Tải mẫu bảng đợt chi trả (.xlsx)</button></div></div></details>';
+}
+function vRecon() {
+  var m = M(), el = $("#v-doi-soat");
+  if (!m) { el.innerHTML = emptyState("Chưa có dữ liệu kỳ này"); return; }
+  var list = termsList(m), all = reconOf(m), c = chan();
+  var vis = all.filter(function (e) { return !c || chOfAcqName(m, e.a) === c; }), st = bstats(vis);
+  var html = '<div class="panel-head"><div><h2>Đối soát phí · ' + esc(monthLabel(m.key)) + " · " + chanLabel() + '</h2><p class="sub">Kiểm tra tiền về có đúng chu kỳ T+ cam kết trong hợp đồng, và phí thực thu có đúng biểu phí. T+ thực tế tính từ ngày giao dịch cuối của đợt (Ngày GD đến) tới ngày tiền về trên sao kê.</p></div></div>';
+  html += kpiRow([["Đợt chi trả", nf(st.n)], ["Đúng hạn", nf(st.ok || 0)], ["Về chậm", '<span class="' + (st.late ? "up" : "") + '">' + nf(st.late || 0) + "</span>", st.late ? "chậm nhất " + st.maxLate + " ngày" : ""], ["Chưa đối chiếu được", nf((st.nc || 0) + (st.pend || 0)), "thiếu chu kỳ HĐ hoặc ngày tiền về"]]);
+  if (!all.length) html += '<div class="callout warn">Kỳ này chưa có dữ liệu đợt chi trả. Đợt chi trả được đọc từ mục D của file tổng hợp và từ các file tải lên ở trang <a href="#tai-len">Tải file</a> (bảng có cột Ngày GD đến và Ngày tiền về; xem mẫu ở cuối trang).</div>';
+  if (c !== "BSP") {
+    html += curSection(m, all, list, { num: 1, pre: "ady-", test: isAdyCardAcq, title: "Thẻ Adyen (card acquiring) theo đồng tiền thanh toán",
+      sub: "Adyen All markets, Adyen – Lotusmiles, Adyen – Evoucher. Hợp đồng: ContractMD\\ECOM channel\\adyen\\adyen card acquiring contract (MA 2025 + AMA AU, EU, JP, SG, UK, US). Mỗi đồng tiền có chu kỳ T+ riêng, sửa được ở bảng cuối trang." });
+    html += curSection(m, all, list, { num: 2, pre: "vcb-", test: isVcbAcq, title: "Thẻ VCB (VCB acquirer) theo đồng tiền thanh toán",
+      sub: "VCB (acquirer), VCB – Lotusmiles, VCB – Evoucher. HĐ 072017: VCB tạm ứng bằng đúng đồng tiền giao dịch (VND, USD, EUR, AUD, GBP, JPY) ngay trong ngày nhận dữ liệu từ MiGS.", extra: vcbFeeHtml(m) });
+    html += lpmSection(m, all, list);
+  } else html += '<div class="callout">Mục 1–3 (thẻ Adyen, thẻ VCB, ví điện tử) thuộc kênh ECOM. Chọn kênh Tất cả hoặc ECOM để xem.</div>';
+  var others = vis.filter(function (e) { return !isAdyCardAcq(e.a) && !isVcbAcq(e.a) && !LPM.some(function (it) { return it.acq === e.a; }); });
+  var byA = {}; others.forEach(function (e) { (byA[e.a] = byA[e.a] || []).push(e); });
+  var orow = Object.keys(byA).sort().map(function (a) {
+    var bs = byA[a], s = bstats(bs);
+    return "<tr><td>" + esc(a) + ' <span class="sec-tag">' + chOfAcqName(m, a) + '</span></td><td class="mono">' + esc(Array.from(new Set(bs.map(function (e) { return e.c; }))).join(", ")) + "</td><td>" + ruleTxt(findRule(list, a, bs[0].c)) + '</td><td class="n">' + nf(s.n) + '</td><td class="n">' + (s.avg == null ? "—" : "T+" + nf(s.avg, 1)) + '</td><td class="n">' + (s.max == null ? "—" : "T+" + s.max) + "</td><td>" + stChip(s) + "</td></tr>";
+  });
+  html += '<div class="panel"><div><h3><span class="sec-num">4</span>Các cổng khác: thời hạn tiền về</h3><p class="sub">2C2P, PayPal, Worldpay BSP, Amex BSP… Chu kỳ HĐ lấy từ sheet Tham số &amp; tỷ giá của file tổng hợp (sửa được ở bảng cuối trang).</p></div>' +
+    table([{ h: "Acquirer" }, { h: "Đồng tiền" }, { h: "T+ theo HĐ" }, { h: "Số đợt", n: 1 }, { h: "T+ BQ", n: 1 }, { h: "T+ cao nhất", n: 1 }, { h: "Đúng hạn?" }], orow) + moreBatches(others) + "</div>";
+  html += contractFeeHtml(m);
+  html += termsPanel(list);
+  el.innerHTML = html;
+}
+$("#v-doi-soat").addEventListener("toggle", function (e) { if (e.target.id === "terms-card") store("terms-open", e.target.open ? "1" : "0"); }, true);
+$("#v-doi-soat").addEventListener("click", function (e) {
+  var id = e.target.id;
+  if (id === "terms-save" || id === "terms-reset") {
+    var o = {};
+    if (id === "terms-save") {
+      var list = termsList(M()), byId = {}; list.forEach(function (r) { byId[r.id] = r; });
+      var base = {}; defaultTerms().concat(((M() && M().terms) || []).map(function (t) { return { id: "wb:" + t[0], d: t[2], n: !!t[1] }; })).forEach(function (r) { base[r.id] = r; });
+      document.querySelectorAll("#v-doi-soat [data-term]").forEach(function (inp) {
+        var rid_ = inp.dataset.term, k = inp.dataset.k, b = base[rid_]; if (!b) return;
+        var v = k === "d" ? (inp.value === "" ? null : Math.max(0, Math.min(60, parseInt(inp.value, 10) || 0))) : inp.value === "1";
+        var bv = k === "d" ? (b.d == null ? null : b.d) : !!b.n;
+        if (v !== bv) { o[rid_] = o[rid_] || {}; o[rid_][k] = v; }
+      });
+    }
+    S.termO = o; store("terms", JSON.stringify(o));
+    if (S.db && S.canWrite !== false) S.db.collection("config").doc("terms").set({ o: o, at: new Date().toISOString() }).then(function () { toast("Đã lưu chu kỳ T+ vào sổ"); }, function (er) { toast("Chỉ lưu trên máy bạn: " + errMsg(er)); });
+    else toast("Đã lưu chu kỳ T+ trên máy bạn");
+    renderAll();
+  }
+  if (id === "tpl-dl") {
+    if (!window.XLSX) { toast("Thư viện Excel chưa tải xong."); return; }
+    var wb = XLSX.utils.book_new(), ws = XLSX.utils.aoa_to_sheet([["Acquirer / nhà cung cấp thu hộ", "Mã đợt / tham chiếu chi trả", "Đồng tiền", "Ngày GD từ", "Ngày GD đến", "Ngày tiền về (sao kê)", "Phương thức"]]);
+    ws["!cols"] = [{ wch: 30 }, { wch: 28 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 16 }];
+    XLSX.utils.book_append_sheet(wb, ws, "Dot chi tra");
+    saveFile("Mau_dot_chi_tra.xlsx", new Blob([XLSX.write(wb, { type: "array", bookType: "xlsx" })]));
+  }
+});
+
+function vBin() {
+  var m = M(), el = $("#v-bin");
+  if (!m) { el.innerHTML = emptyState("Chưa có dữ liệu kỳ này"); return; }
+  var html = "";
+  function block(b, title, sub, curLab, extraCols, extraCells) {
+    if (!b || !b.top) return "";
+    var tds = sum(b.brands, "ds");
+    return '<div class="panel"><div><h3>' + title + '</h3><p class="sub">' + sub + " Tổng " + nf(b.count) + " BIN.</p></div>" +
+      bars(b.brands.slice().sort(function (x, y) { return y.ds - x.ds; }), { name: function (x) { return x.brand; }, val: function (x) { return x.ds; }, label: function (x) { return pct(x.ds / tds, 1) + " · " + nf(x.bins) + " BIN"; } }) +
+      table([{ h: "BIN" }, { h: "Ngân hàng phát hành" }, { h: "Hãng · loại" }, { h: "Nước" }, { h: "Số GD", n: 1 }, { h: "Doanh số (" + curLab + ")", n: 1 }, { h: "Tỷ trọng", n: 1 }].concat(extraCols),
+        b.top.map(function (r) { return '<tr><td class="mono">' + esc(r.bin) + "</td><td>" + esc(r.bank) + "</td><td>" + esc(r.brand) + '<div class="note">' + esc(r.variant) + '</div></td><td class="mono">' + esc(r.cty) + '</td><td class="n">' + nf(r.gd) + '</td><td class="n">' + nf(r.ds, curLab === "USD" ? 2 : 0) + '</td><td class="n">' + pct(r.share, 2) + "</td>" + extraCells(r) + "</tr>"; })) + "</div>";
+  }
+  html += block(m.binA, "BIN thẻ qua Adyen (Visa, Mastercard)", "40 BIN có doanh số lớn nhất, giao dịch Settled.", "USD",
+    [{ h: "Interchange", n: 1 }, { h: "Scheme", n: 1 }, { h: "Markup", n: 1 }],
+    function (r) { return '<td class="n">' + pct(r.ic) + '</td><td class="n">' + pct(r.sch) + '</td><td class="n">' + pct(r.mk) + "</td>"; });
+  html += block(m.binV, "BIN thẻ qua VCB (Visa, Mastercard, Amex, JCB)", "40 BIN có doanh số lớn nhất trong file TXN của VCB.", "VND",
+    [{ h: "Nhóm phát hành" }, { h: "Phí HĐ", n: 1 }],
+    function (r) { return '<td class="note">' + esc(r.grp || "") + '</td><td class="n">' + pct(r.rate, 3) + "</td>"; });
+  el.innerHTML = html || emptyState("File kỳ này không có sheet BIN");
+}
+
+/* ------------------------------------------------------------------ acquirer views: Adyen Card, VCB Card (ECOM) */
+function kpiStrip(rows, prevRows, extra) {
+  var c = { n: sum(rows, "n"), v: sum(rows, "v"), f: sum(rows, "f"), r: sum(rows, "r") }, p = prevRows && prevRows.length ? { n: sum(prevRows, "n"), v: sum(prevRows, "v"), f: sum(prevRows, "f") } : null;
+  return kpiRow([["Số GD bán", nf(c.n), p && delta(c.n, p.n)], ["Doanh số bán", money(c.v) + " <small>VND</small>", p && delta(c.v, p.v)],
+    ["Tổng phí", money(c.f) + " <small>VND</small>", p && delta(c.f, p.f)], ["Tỷ lệ phí", pct(rate(c.f, c.v)), p && delta(rate(c.f, c.v), rate(p.f, p.v), true)]].concat(extra || []));
+}
+function feeRow(label, g, tot, opt) {
+  opt = opt || {};
+  return "<tr><td>" + label + '</td><td class="n">' + nf(g.n) + '</td><td class="n">' + money(g.v) + '</td><td class="n">' + pct(rate(g.v, tot), 1) + '</td><td class="n">' + money(g.f) + '</td><td class="n">' + rateChip(rate(g.f, g.v)) + "</td>" +
+    (opt.ic ? '<td class="n">' + pct(rate(g.i, g.icv)) + '</td><td class="n">' + pct(rate(g.h, g.icv)) + '</td><td class="n">' + pct(rate(g.u, g.icv)) + "</td>" : "") + "</tr>";
+}
+var FEE_COLS = [{ h: "Số GD", n: 1 }, { h: "Doanh số", n: 1 }, { h: "Tỷ trọng", n: 1 }, { h: "Tổng phí", n: 1 }, { h: "Tỷ lệ phí", n: 1 }];
+var IC_COLS = [{ h: "Interchange", n: 1 }, { h: "Scheme", n: 1 }, { h: "Markup", n: 1 }];
+function isAdyenCard(d) { return d.s === "Adyen Card" && /^Adyen All markets$/i.test(d.a); }
+function isVcbCard(d) { return /^VCB/i.test(d.a) && /visa|master|american|amex|jcb/i.test(d.b); }
+function vAdyenCard() {
+  var m = M(), el = $("#v-adyen-card");
+  if (!m) { el.innerHTML = emptyState("Chưa có dữ liệu kỳ này"); return; }
+  var rows = m.det.filter(isAdyenCard), pm = P();
+  if (!rows.length) { el.innerHTML = '<div class="empty"><strong>Kỳ ' + esc(monthLabel(m.key)) + " không có dòng Adyen All markets trong sheet Adyen Card</strong></div>"; return; }
+  var tot = sum(rows, "v"), ic = agg(rows, function () { return "all"; })[0];
+  var fb = load("ady-brand") || "", fs = load("ady-scope") || "";
+  var html = '<div class="panel"><div><h2>Adyen Card · Adyen All markets · ' + esc(monthLabel(m.key)) + '</h2><p class="sub">Thẻ Visa và Mastercard qua Adyen, phí IC++ = Interchange + Scheme fee + Markup (+ phí khác). Số liệu từ sheet Adyen Card, đã bỏ các dòng Total; tỷ lệ tính trên doanh số bán.</p></div>' +
+    kpiStrip(rows, pm && pm.det.filter(isAdyenCard), [["Interchange BQ", pct(rate(ic.i, ic.icv))], ["Scheme fee BQ", pct(rate(ic.h, ic.icv))], ["Markup BQ", pct(rate(ic.u, ic.icv))]]) + "</div>";
+  var br = agg(rows, function (d) { return d.b; }).sort(function (a, b) { return b.v - a.v; });
+  var bs = agg(rows, function (d) { return d.b + "|" + scope(d); }).sort(function (a, b) { return a.key < b.key ? -1 : 1; });
+  html += '<div class="panel"><div><h3>Theo hãng thẻ và phạm vi phát hành</h3><p class="sub">Nội địa: thẻ phát hành cùng nước với acquirer của Adyen; xuyên biên giới: thẻ nước khác.</p></div>' +
+    table([{ h: "Hãng · phạm vi" }].concat(FEE_COLS, IC_COLS), br.map(function (g) {
+      var sub = bs.filter(function (x) { return x.key.indexOf(g.key + "|") === 0; });
+      return feeRow("<b>" + esc(g.key) + "</b>", g, tot, { ic: 1 }) + sub.map(function (x) { return feeRow('<span style="padding-left:var(--sp-7)">' + esc(x.key.split("|")[1]) + "</span>", x, tot, { ic: 1 }); }).join("");
+    }), { foot: '<tfoot><tr class="tot"><td>Cộng</td><td class="n">' + nf(ic.n) + '</td><td class="n">' + money(ic.v) + '</td><td class="n">100%</td><td class="n">' + money(ic.f) + '</td><td class="n">' + pct(rate(ic.f, ic.v)) + '</td><td class="n">' + pct(rate(ic.i, ic.icv)) + '</td><td class="n">' + pct(rate(ic.h, ic.icv)) + '</td><td class="n">' + pct(rate(ic.u, ic.icv)) + "</td></tr></tfoot>" }) + "</div>";
+  var brands = br.map(function (g) { return g.key; }), scopes = Array.from(new Set(rows.map(scope)));
+  var vr = agg(rows.filter(function (d) { return (!fb || d.b === fb) && (!fs || scope(d) === fs); }), function (d) { return d.b + "|" + (d.t || "—"); }).sort(function (a, b) { return b.v - a.v; });
+  html += '<div class="panel"><div class="panel-head"><div><h3>Theo loại thẻ (Payment Method Variant)</h3><p class="sub">Loại thẻ có tỷ lệ Interchange cao nhất thường là thẻ thương mại, premium hoặc thẻ phát hành ngoài khu vực.</p></div><div class="filters">' +
+    '<label class="note" for="f-ab">Hãng</label><select id="f-ab"><option value="">Tất cả</option>' + brands.map(function (b) { return "<option" + (b === fb ? " selected" : "") + ">" + esc(b) + "</option>"; }).join("") + "</select>" +
+    '<label class="note" for="f-as">Phạm vi</label><select id="f-as"><option value="">Tất cả</option>' + scopes.map(function (s) { return "<option" + (s === fs ? " selected" : "") + ">" + esc(s) + "</option>"; }).join("") + "</select></div></div>" +
+    table([{ h: "Loại thẻ" }, { h: "Hãng" }].concat(FEE_COLS, IC_COLS), vr.map(function (g) { var k = g.key.split("|"); return feeRow('<span class="mono">' + esc(k[1]) + "</span></td><td>" + esc(k[0]), g, tot, { ic: 1 }); })) + "</div>";
+  var cu = agg(rows, function (d) { return d.c; }).sort(function (a, b) { return b.v - a.v; });
+  html += '<div class="grid2"><div class="panel"><div><h3>Theo đồng tiền quyết toán</h3><p class="sub">Đã quy VND theo tỷ giá của kỳ. Thời hạn tiền về từng đồng tiền: xem <a href="#doi-soat">Đối soát phí</a>.</p></div>' +
+    table([{ h: "Tiền QT" }].concat(FEE_COLS, IC_COLS), cu.map(function (g) { return feeRow('<span class="mono">' + esc(g.key) + "</span>", g, tot, { ic: 1 }); })) + "</div>" +
+    '<div class="panel"><div><h3>Cơ cấu phí</h3><p class="sub">Tỷ trọng từng thành phần trong tổng phí Adyen Card.</p></div>' +
+    bars([{ k: "Interchange", v: ic.i }, { k: "Scheme fee", v: ic.h }, { k: "Markup", v: ic.u }, { k: "Phí khác (hoàn, chargeback)", v: Math.max(0, ic.f - ic.i - ic.h - ic.u) }],
+      { name: function (x) { return x.k; }, val: function (x) { return x.v; }, label: function (x) { return money(x.v) + " · " + pct(rate(x.v, ic.f), 1); } }) +
+    '<p class="note">BIN thẻ chi tiết: xem trang <a href="#bin">BIN thẻ</a>.</p></div></div>';
+  el.innerHTML = html;
+  $("#f-ab").onchange = function (e) { store("ady-brand", e.target.value); vAdyenCard(); };
+  $("#f-as").onchange = function (e) { store("ady-scope", e.target.value); vAdyenCard(); };
+}
+function vVcbCard() {
+  var m = M(), el = $("#v-vcb-card");
+  if (!m) { el.innerHTML = emptyState("Chưa có dữ liệu kỳ này"); return; }
+  var rows = m.det.filter(isVcbCard), pm = P();
+  if (!rows.length) { el.innerHTML = '<div class="empty"><strong>Kỳ ' + esc(monthLabel(m.key)) + " không có dòng thẻ VCB acquirer</strong></div>"; return; }
+  var tot = sum(rows, "v"), act = sum(m.vcb || [], "act"), hd = sum(m.vcb || [], "hd"), vds = sum(m.vcb || [], "ds");
+  var html = '<div class="panel"><div><h2>VCB Card · ' + esc(monthLabel(m.key)) + '</h2><p class="sub">Thẻ Visa, Mastercard, Amex, JCB do VCB làm acquirer (kênh online qua Adyen, Lotusmiles, Evoucher). Phí VCB tính theo MDR: số VCB thực trừ trên sao kê, đã gồm VAT. Tổng phí ở đây đã trừ phần phí VCB trả lại khi hoàn tiền; phần so với hợp đồng tính trên GD bán nên tỷ lệ cao hơn một chút.</p></div>' +
+    kpiStrip(rows, pm && pm.det.filter(isVcbCard), m.vcb && m.vcb.length ? [["Tỷ lệ theo HĐ (gồm VAT)", pct(rate(hd, vds), 3), "theo sheet BIN VCB"], ["Thực trừ − HĐ", money(act - hd) + " <small>VND</small>", act - hd > 0 ? '<span class="up">VCB thu cao hơn HĐ</span>' : '<span class="down">VCB thu thấp hơn HĐ</span>']] : []) + "</div>";
+  var br = agg(rows, function (d) { return d.b; }).sort(function (a, b) { return b.v - a.v; });
+  var ch = agg(rows, function (d) { return d.b + "|" + d.a; });
+  html += '<div class="panel"><div><h3>Theo hãng thẻ và kênh</h3><p class="sub">VCB (acquirer) = bán vé online; VCB – Lotusmiles và VCB – Evoucher là các kênh riêng.</p></div>' +
+    table([{ h: "Hãng · kênh" }].concat(FEE_COLS), br.map(function (g) {
+      return feeRow("<b>" + esc(g.key) + "</b>", g, tot) + ch.filter(function (x) { return x.key.indexOf(g.key + "|") === 0; }).sort(function (a, b) { return b.v - a.v; })
+        .map(function (x) { return feeRow('<span style="padding-left:var(--sp-7)">' + esc(x.key.split("|")[1]) + "</span>", x, tot); }).join("");
+    }), { foot: '<tfoot><tr class="tot"><td>Cộng</td><td class="n">' + nf(sum(rows, "n")) + '</td><td class="n">' + money(tot) + '</td><td class="n">100%</td><td class="n">' + money(sum(rows, "f")) + '</td><td class="n">' + pct(rate(sum(rows, "f"), tot)) + "</td></tr></tfoot>" }) + "</div>";
+  var cu = agg(rows, function (d) { return d.b + "|" + d.c; }).sort(function (a, b) { return a.key < b.key ? -1 : 1; });
+  html += '<div class="grid2"><div class="panel"><div><h3>Theo đồng tiền quyết toán</h3><p class="sub">VCB trả VND hoặc ngoại tệ theo đồng tiền giao dịch; đã quy VND. Thời hạn tiền về: xem <a href="#doi-soat">Đối soát phí</a>.</p></div>' +
+    table([{ h: "Hãng" }, { h: "Tiền QT" }].concat(FEE_COLS), cu.map(function (g) { var k = g.key.split("|"); return feeRow(esc(k[0]) + '</td><td class="mono">' + esc(k[1]), g, tot); })) + "</div>";
+  if (m.vcb && m.vcb.length) html += '<div class="panel">' + vcbFeeHtml(m) + '<p class="note">Biểu phí HĐ: Visa/MC thẻ VN 1,5%, thẻ nước ngoài 2,75–3,94%; JCB 1,5–1,6%; Amex 2,7% (chưa VAT). Chi tiết từng BIN: trang <a href="#bin">BIN thẻ</a>.</p></div>';
+  html += "</div>";
+  el.innerHTML = html;
+}
+
+/* ------------------------------------------------------------------ files: YYMM data / BANK STATEMENT · BSP · ECOM */
+var ACCEPT = ".xlsx,.xls,.xlsm,.csv,.md,.markdown,.txt";
+var OK_EXT = /\.(xlsx|xlsm|xls|csv|md|markdown|txt)$/i;
+var TEXT_CT = { md: "text/markdown", markdown: "text/markdown", csv: "text/csv", txt: "text/plain" };
+function extOf(name) { var m = /\.([^.]+)$/.exec(name || ""); return m ? m[1].toLowerCase() : ""; }
+function b64(buf) { var u = new Uint8Array(buf), s = "", CH = 0x8000; for (var i = 0; i < u.length; i += CH) s += String.fromCharCode.apply(null, u.subarray(i, i + CH)); return btoa(s); }
+function unb64(s) { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+function filesOf(mk) {
+  var out = [];
+  Object.keys(S.files).forEach(function (id) { var f = S.files[id]; if (f.m === mk) out.push(f); });
+  Object.keys(S.tempFiles).forEach(function (id) { var f = S.tempFiles[id]; if (f.m === mk) out.push(f); });
+  return out.sort(function (a, b) { return a.name < b.name ? -1 : 1; });
+}
+function pathOf(f) {
+  if (f.sec === "TONG HOP") return "";
+  if (f.sec === "BANK STATEMENT") return "BANK STATEMENT/";
+  return f.sec + "/" + acqInfo(f.sec, f.acq).folder + "/";
+}
+function readFile(file) {
+  return new Promise(function (res, rej) {
+    var fr = new FileReader();
+    fr.onload = function () { res(fr.result); };
+    fr.onerror = function () { rej(new Error("Không đọc được file.")); };
+    fr.readAsArrayBuffer(file);
+  });
+}
+function gridsFrom(buf, raw) {
+  if (!window.XLSX) throw new Error("Thư viện đọc Excel chưa tải xong. Kiểm tra kết nối rồi thả lại file.");
+  var wb, g = {};
+  if (raw) { var text; try { text = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (e) { text = new TextDecoder("windows-1258").decode(buf); } wb = XLSX.read(text.replace(/^﻿/, ""), { type: "string", raw: true }); }
+  else wb = XLSX.read(buf, { type: "array" });
+  wb.SheetNames.forEach(function (n) {
+    var ws = wb.Sheets[n]; if (!ws["!ref"]) { g[n] = []; return; }
+    var e = XLSX.utils.decode_range(ws["!ref"]).e;
+    g[n] = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true, range: { s: { r: 0, c: 0 }, e: e } });
+  });
+  return g;
+}
+function storeBlob(buf, ext, name) {
+  var ct = TEXT_CT[ext];
+  if (ct) {
+    var ok = true; try { new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (e) { ok = false; }
+    if (ok) return S.assets.upload(new Blob([buf], { type: ct }), { type: ct }).then(function (r) { return { id: r.id, wrap: 0 }; });
+  }
+  var body = JSON.stringify({ v: 1, name: name, ext: ext, b64: b64(buf) });
+  if (body.length > 20 * 1048576 - 2048) return Promise.reject({ code: "too_large" });
+  return S.assets.upload(new Blob([body], { type: "application/json" }), { type: "application/json" }).then(function (r) { return { id: r.id, wrap: 1 }; });
+}
+function ensureFolder(mk) {
+  var y = yymm(mk);
+  if (!y || S.folders[y]) return Promise.resolve();
+  S.folders[y] = { name: y + " data", m: mk };
+  return S.db.collection("folders").doc(y).set({ name: y + " data", m: mk, at: new Date().toISOString() }).then(function () { toast("Đã tạo thư mục " + y + " data"); }, function (e) { delete S.folders[y]; throw e; });
+}
+function capsReady() { return S.caps || Promise.resolve(); }
+/* login for the Tải file page: account + SHA-256 hash in db config/auth (default admin / admin) */
+var AUTH_SALT = "sophi-upload:";
+var DEFAULT_AUTH = { u: "admin", h: "" };
+S.auth = null;
+function sha(s) {
+  if (!window.crypto || !crypto.subtle) return Promise.reject(new Error("Trình duyệt không hỗ trợ mã hoá mật khẩu."));
+  return crypto.subtle.digest("SHA-256", new TextEncoder().encode(AUTH_SALT + s)).then(function (b) { return Array.from(new Uint8Array(b)).map(function (x) { return ("0" + x.toString(16)).slice(-2); }).join(""); });
+}
+function authNow() { return S.auth || DEFAULT_AUTH; }
+var SESSION_MS = 10 * 60 * 1000; /* phải nhập lại mật khẩu sau mỗi 10 phút kể từ lúc đăng nhập */
+function authKey() { return authNow().u + "|" + (authNow().h || "default"); }
+function loginAt() {
+  var v = null; try { v = sessionStorage.getItem("sophi.upok"); } catch (e) { v = S.upok || null; }
+  if (!v) return 0;
+  var i = v.lastIndexOf("|"), k = v.slice(0, i), t = +v.slice(i + 1);
+  return k === authKey() && isFinite(t) ? t : 0;
+}
+function isUnlocked() { var t = loginAt(); return !!t && Date.now() - t < SESSION_MS; }
+function setUnlocked(on) {
+  var v = on ? authKey() + "|" + Date.now() : "";
+  S.upok = v; try { if (on) sessionStorage.setItem("sophi.upok", v); else sessionStorage.removeItem("sophi.upok"); } catch (e) {}
+  S.wasOk = on; applyLock();
+}
+function applyLock() {
+  var ok = isUnlocked();
+  $("#v-tai-len").classList.toggle("locked", !ok);
+  var left = ok ? Math.max(1, Math.ceil((SESSION_MS - (Date.now() - loginAt())) / 60000)) : 0;
+  $("#acc-sub").textContent = "Đang đăng nhập: " + authNow().u + (ok ? ". Phiên còn khoảng " + left + " phút, sau đó phải nhập lại mật khẩu." : ".") + " Đổi tài khoản và mật khẩu dùng để mở trang này" + (S.db ? " (lưu vào sổ, áp dụng cho mọi người)." : " (đang mở ngoài claude.ai: chỉ lưu trên máy bạn).");
+}
+setInterval(function () {
+  var ok = isUnlocked();
+  if (S.wasOk && !ok) { S.wasOk = false; try { sessionStorage.removeItem("sophi.upok"); } catch (e) {} S.upok = ""; applyLock(); toast("Hết phiên 10 phút. Nhập lại mật khẩu để tiếp tục tải file."); }
+  else if (ok) applyLock();
+}, 15000);
+function checkLogin(u, p) {
+  var a = authNow();
+  if (u !== a.u) return Promise.resolve(false);
+  if (!a.h) return Promise.resolve(p === "admin");
+  return sha(p).then(function (h) { return h === a.h; });
+}
+$("#up-lock").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var u = $("#lg-user").value.trim(), p = $("#lg-pass").value;
+  checkLogin(u, p).then(function (ok) {
+    if (!ok) { $("#lg-msg").textContent = "Sai tài khoản hoặc mật khẩu."; $("#lg-pass").select(); return; }
+    $("#lg-msg").textContent = ""; $("#lg-pass").value = ""; setUnlocked(true); renderAll();
+  }, function (er) { $("#lg-msg").textContent = er.message; });
+});
+$("#acc-lock").addEventListener("click", function () { setUnlocked(false); $("#lg-user").focus(); });
+$("#acc-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var u = $("#acc-user").value.trim(), p = $("#acc-pass").value, p2 = $("#acc-pass2").value, msg = $("#acc-msg");
+  if (!u) { msg.textContent = "Nhập tài khoản mới."; return; }
+  if (p.length < 4) { msg.textContent = "Mật khẩu cần ít nhất 4 ký tự."; return; }
+  if (p !== p2) { msg.textContent = "Hai lần nhập mật khẩu không khớp."; return; }
+  sha(p).then(function (h) {
+    var rec = { u: u, h: h, at: new Date().toISOString() };
+    var done = function (where) { S.auth = rec; setUnlocked(true); e.target.reset(); msg.textContent = "Đã lưu " + where + "."; };
+    if (S.db && S.canWrite !== false) return S.db.collection("config").doc("auth").set(rec).then(function () { done("vào sổ"); }, function (er) { msg.textContent = "Chưa lưu được: " + errMsg(er); });
+    store("auth", JSON.stringify(rec)); done("trên máy bạn");
+  }, function (er) { msg.textContent = er.message; });
+});
+function uploadFiles(list, sec, acq) {
+  if (!isUnlocked()) { applyLock(); toast("Đăng nhập ở trang Tải file trước khi tải file (phiên hết hạn sau 10 phút)."); location.hash = "tai-len"; return; }
+  var mk = S.upMonth;
+  if (!mk) { toast("Chọn kỳ dữ liệu trước khi tải file."); $("#up-month").focus(); return; }
+  Array.from(list || []).forEach(function (f) { uploadOne(f, sec, acq || "", mk); });
+}
+function uploadOne(file, sec, acq, mk) {
+  var u = { id: rid(), name: file.name, sec: sec, acq: acq, m: mk, state: "reading" };
+  S.ups.unshift(u); S.ups = S.ups.slice(0, 30); renderUpLog();
+  if (!OK_EXT.test(file.name)) { u.state = "error"; u.err = "Chỉ nhận .xlsx, .xls, .xlsm, .csv, .md, .txt."; renderUpLog(); return; }
+  var ext = extOf(file.name), info = acqInfo(sec, acq);
+  readFile(file).then(function (buf) {
+    var doc = { m: mk, f: yymm(mk) + " data", sec: sec, acq: acq, name: file.name.slice(0, 180), ext: ext, size: file.size, at: new Date().toISOString(), sheets: [], b: [], nb: 0 };
+    if (/^(xlsx|xlsm|xls|csv)$/.test(ext)) {
+      try {
+        var g = gridsFrom(buf, ext === "csv");
+        doc.sheets = Object.keys(g).slice(0, 40).map(function (n) { return { n: n.slice(0, 60), r: g[n].length }; });
+        var bt = genericBatches(g, sec === "BANK STATEMENT" ? "" : info.def);
+        doc.nb = bt.length; doc.b = bt.slice(0, 1500);
+      } catch (e) { u.warn = "Không đọc được bảng trong file, vẫn lưu file gốc."; }
+    } else if (/^(md|markdown|txt)$/.test(ext)) {
+      try { doc.lines = new TextDecoder("utf-8").decode(buf).split("\n").length; } catch (e) {}
+    }
+    u.nb = doc.nb;
+    return capsReady().then(function () {
+      if (!S.db || !S.assets) {
+        var id = "local-" + u.id; doc.id = id; doc.local = 1; doc.buf = buf; S.tempFiles[id] = doc;
+        u.state = "local"; renderUpLog(); renderAll(); return;
+      }
+      u.state = "uploading"; renderUpLog();
+      return storeBlob(buf, ext, file.name).then(function (res) {
+        doc.asset = res.id; doc.wrap = res.wrap;
+        return ensureFolder(mk).then(function () { return S.db.collection("files").doc(u.id).set(doc); }).catch(function (e) { S.assets.delete(res.id).catch(function () {}); throw e; });
+      }).then(function () { u.state = "done"; renderUpLog(); });
+    });
+  }).catch(function (e) { u.state = "error"; u.err = errMsg(e); renderUpLog(); });
+}
+function renderUpLog() {
+  var el = $("#up-log");
+  el.innerHTML = S.ups.slice(0, 12).map(function (u) {
+    var where = u.sec === "BANK STATEMENT" || u.sec === "TONG HOP" ? SEC_NAME[u.sec] : u.sec + " / " + acqInfo(u.sec, u.acq).name;
+    var c = u.state === "done" ? '<span class="chip c-good">Đã lưu</span>' : u.state === "local" ? '<span class="chip c-warn">Chỉ lưu tạm trên máy</span>' : u.state === "error" ? '<span class="chip c-crit">Lỗi</span>' : '<span class="chip c-info">' + (u.state === "reading" ? "Đang đọc…" : "Đang tải lên…") + "</span>";
+    return "<li>" + c + '<span class="nm"><b>' + esc(u.name) + '</b> → <span class="fold">' + esc(yymm(u.m) + " data / " + where) + "</span></span>" +
+      (u.nb ? '<span class="chip c-info">' + nf(u.nb) + " đợt chi trả</span>" : "") + (u.err ? '<span class="note" style="color:var(--color-crit)">' + esc(u.err) + "</span>" : "") + (u.warn ? '<span class="note">' + esc(u.warn) + "</span>" : "") + "</li>";
+  }).join("");
+}
+function knownFolders() {
+  var o = {};
+  Object.keys(S.folders).forEach(function (y) { o[S.folders[y].m || ""] = 1; });
+  Object.keys(S.files).forEach(function (id) { o[S.files[id].m] = 1; });
+  Object.keys(S.tempFiles).forEach(function (id) { o[S.tempFiles[id].m] = 1; });
+  Object.keys(allMonths()).forEach(function (k) { o[k] = 1; });
+  if (S.upMonth) o[S.upMonth] = 1;
+  return Object.keys(o).filter(function (k) { return /^\d{4}-\d{2}$/.test(k); }).sort().reverse();
+}
+function renderUpload() {
+  var mk = S.upMonth, y = yymm(mk), files = filesOf(mk);
+  $("#up-month").value = mk || "";
+  var exists = !!(y && (S.folders[y] || files.length));
+  $("#up-folder").innerHTML = mk ? '<div class="folderline"><span class="fold">' + esc(y) + ' data</span>' + (exists ? '<span class="chip c-good">Đã có · ' + files.length + " file</span>" : '<span class="chip c-info">Kỳ mới: thư mục sẽ được tạo khi tải file đầu tiên</span>') +
+    '<span class="note">BANK STATEMENT · BSP · ECOM</span></div>' : '<p class="note">Chọn kỳ dữ liệu để bắt đầu.</p>';
+  var cap = "";
+  if (S.dbState === "none") cap = '<div class="callout warn">Trang đang mở ngoài claude.ai nên không có kho lưu trữ: file tải lên chỉ được đọc tạm trên máy bạn trong phiên này (vẫn tải được .zip).</div>';
+  else if (S.db && !S.assets && S.caps && S.capsDone) cap = '<div class="callout warn">Chỉ người có quyền chỉnh sửa trang mới lưu file vào thư mục được. File bạn thả vào chỉ được đọc tạm trên máy bạn.</div>';
+  $("#up-cap").innerHTML = cap;
+  var cnt = function (sec, acq) { return files.filter(function (f) { return f.sec === sec && (sec === "BANK STATEMENT" || f.acq === acq); }).length; };
+  $("#up-bank-n").textContent = cnt("BANK STATEMENT") + " file";
+  ["ECOM", "BSP"].forEach(function (sec) {
+    $("#up-" + sec).innerHTML = ACQ[sec].map(function (a) {
+      var n = cnt(sec, a[0]);
+      return '<div class="tile" data-sec="' + sec + '" data-acq="' + a[0] + '"><div class="tile-head"><b>' + esc(a[1]) + '</b><span class="chip ' + (n ? "c-good" : "c-mute") + '">' + n + " file</span></div>" +
+        '<div class="note">' + esc(a[3] || "Thư mục " + a[2]) + '</div><button type="button" class="btn sm" data-pick>Chọn file</button></div>';
+    }).join("");
+  });
+  var ks = knownFolders();
+  $("#folder-list").innerHTML = ks.map(function (k) { return '<button type="button" data-month="' + k + '" aria-pressed="' + (k === mk) + '">' + esc(yymm(k)) + " data</button>"; }).join("") || '<span class="note">Chưa có thư mục nào.</span>';
+  renderTree(mk, files);
+  $("#zip-btn").disabled = !mk;
+}
+function fileRow(f, lv) {
+  var del = (f.local || S.assets) ? (S.delFile === (f.id || f._id) ? '<span class="note">Xoá file này?</span><button type="button" class="btn sm danger" data-delf="' + esc(f.id || f._id) + '" data-ok="1">Xoá</button><button type="button" class="btn sm" data-delf="">Thôi</button>' : '<button type="button" class="btn sm danger" data-delf="' + esc(f.id || f._id) + '">Xoá</button>') : "";
+  return '<div class="fl ' + lv + '"><span class="nm">' + esc(f.name) + (f.local ? ' <span class="chip c-warn">tạm</span>' : "") + "</span>" + '<span class="note">' + fmtSize(f.size) + (f.nb ? " · " + nf(f.nb) + " đợt chi trả" : "") + (f.sheets && f.sheets.length ? " · " + f.sheets.length + " sheet" : "") + (f.at ? " · " + esc(new Date(f.at).toLocaleDateString("vi-VN")) : "") + "</span>" +
+    '<span class="actions"><button type="button" class="btn sm" data-dlf="' + esc(f.id || f._id) + '">Tải</button>' + del + "</span></div>";
+}
+function renderTree(mk, files) {
+  var el = $("#tree");
+  if (!mk) { el.innerHTML = ""; return; }
+  var y = yymm(mk), h = '<div class="fd">' + esc(y) + ' data <span class="note">' + files.length + " file</span></div>";
+  files.filter(function (f) { return f.sec === "TONG HOP"; }).forEach(function (f) { h += fileRow(f, "l1"); });
+  var bank = files.filter(function (f) { return f.sec === "BANK STATEMENT"; });
+  h += '<div class="fd l1">BANK STATEMENT <span class="note">' + bank.length + " file</span></div>" + bank.map(function (f) { return fileRow(f, "l2"); }).join("");
+  ["BSP", "ECOM"].forEach(function (sec) {
+    var sf = files.filter(function (f) { return f.sec === sec; });
+    h += '<div class="fd l1">' + sec + ' <span class="note">' + sf.length + " file</span></div>";
+    ACQ[sec].forEach(function (a) {
+      var af = sf.filter(function (f) { return f.acq === a[0]; });
+      if (af.length) h += '<div class="fd l2">' + esc(a[2]) + ' <span class="note">' + af.length + " file</span></div>" + af.map(function (f) { return fileRow(f, "l3"); }).join("");
+    });
+    if (!sf.length) h += '<div class="fl l2"><span class="note">Chưa có file. Các thư mục acquirer trống vẫn có trong file .zip.</span></div>';
+  });
+  el.innerHTML = h;
+}
+function fileById(id) { var f = S.files[id] || S.tempFiles[id]; return f || null; }
+function fileBytes(f) {
+  if (f.buf) return Promise.resolve(new Uint8Array(f.buf));
+  return fetch("/_blob/" + f.asset).then(function (r) {
+    if (!r.ok) throw new Error("Không tải được " + f.name + " (mã " + r.status + ").");
+    return f.wrap ? r.json().then(function (j) { return unb64(j.b64); }) : r.arrayBuffer().then(function (b) { return new Uint8Array(b); });
+  });
+}
+function saveFile(name, data) {
+  var blob = data instanceof Blob ? data : new Blob([data]);
+  if (S.dl) return S.dl.save({ filename: name, data: blob }).then(function () { toast("Đã lưu " + name); }, function (e) {
+    if (e && e.code === "declined") return;
+    toast(e && e.code === "rejected_extension" ? "Định dạng này không tải trực tiếp được." : "Chưa tải được file: " + ((e && e.message) || ""));
+  });
+  var url = URL.createObjectURL(blob), a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  return Promise.resolve();
+}
+function loadZip() {
+  if (window.JSZip) return Promise.resolve(window.JSZip);
+  return new Promise(function (res, rej) {
+    var s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+    s.onload = function () { res(window.JSZip); }; s.onerror = function () { rej(new Error("Không tải được thư viện nén file.")); };
+    document.head.appendChild(s);
+  });
+}
+function zipFiles(mk, files, name, withSkeleton) {
+  var root = yymm(mk) + " data/";
+  return loadZip().then(function (JSZip) {
+    var z = new JSZip();
+    if (withSkeleton) { z.folder(root + "BANK STATEMENT"); ["ECOM", "BSP"].forEach(function (sec) { ACQ[sec].forEach(function (a) { z.folder(root + sec + "/" + a[2]); }); }); }
+    return Promise.all(files.map(function (f) { return fileBytes(f).then(function (b) { z.file(root + pathOf(f) + f.name, b); }); }))
+      .then(function () { return z.generateAsync({ type: "blob" }); });
+  }).then(function (blob) { return saveFile(name, blob); });
+}
+$("#v-tai-len").addEventListener("click", function (e) {
+  var t = e.target, b;
+  if ((b = t.closest("[data-pick]")) || (b = t.closest("#up-bank"))) {
+    var host = b.closest("[data-sec]"), inp = document.createElement("input");
+    inp.type = "file"; inp.multiple = true; inp.accept = ACCEPT;
+    inp.onchange = function () { uploadFiles(inp.files, host.dataset.sec, host.dataset.acq); };
+    inp.click(); return;
+  }
+  if ((b = t.closest("button[data-month]"))) { S.upMonth = b.dataset.month; store("upm", S.upMonth); S.delFile = null; renderUpload(); return; }
+  if ((b = t.closest("button[data-dlf]"))) {
+    var f = fileById(b.dataset.dlf); if (!f) return;
+    b.disabled = true;
+    var p = /^(xlsx|md|csv|txt)$/.test(f.ext) ? fileBytes(f).then(function (bytes) { return saveFile(f.name, new Blob([bytes])); }) : zipFiles(f.m, [f], f.name.replace(/\.[^.]+$/, "") + ".zip", false);
+    p.catch(function (er) { toast(er.message || "Chưa tải được file."); }).then(function () { b.disabled = false; });
+    return;
+  }
+  if ((b = t.closest("button[data-delf]"))) {
+    var id = b.dataset.delf;
+    if (!id) { S.delFile = null; renderUpload(); return; }
+    if (!b.dataset.ok) { S.delFile = id; renderUpload(); return; }
+    S.delFile = null; var fd = fileById(id); if (!fd) return;
+    if (fd.local) { delete S.tempFiles[id]; renderAll(); return; }
+    S.db.collection("files").doc(id).delete().then(function () {
+      if (fd.asset && S.assets) S.assets.delete(fd.asset).catch(function () {});
+      toast("Đã xoá " + fd.name);
+    }, function (er) { toast("Chưa xoá được: " + errMsg(er)); });
+    return;
+  }
+  if (t.id === "zip-btn" && S.upMonth) {
+    t.disabled = true;
+    zipFiles(S.upMonth, filesOf(S.upMonth), yymm(S.upMonth) + " data.zip", true).catch(function (er) { toast(er.message || "Chưa tạo được file .zip."); }).then(function () { t.disabled = false; });
+  }
+});
+$("#v-tai-len").addEventListener("keydown", function (e) {
+  if (e.target.id === "up-bank" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.target.click(); }
+});
+$("#up-month").addEventListener("change", function (e) { if (/^\d{4}-\d{2}$/.test(e.target.value)) { S.upMonth = e.target.value; store("upm", S.upMonth); renderUpload(); } });
+function dropTarget(e) { return e.target.closest && e.target.closest(".tile, .drop-sm, #drop"); }
+document.addEventListener("dragover", function (e) { e.preventDefault(); var t = dropTarget(e); document.querySelectorAll(".over").forEach(function (x) { if (x !== t) x.classList.remove("over"); }); if (t) t.classList.add("over"); });
+document.addEventListener("dragleave", function (e) { var t = dropTarget(e); if (t && !t.contains(e.relatedTarget)) t.classList.remove("over"); });
+document.addEventListener("drop", function (e) {
+  e.preventDefault();
+  document.querySelectorAll(".over").forEach(function (x) { x.classList.remove("over"); });
+  var t = dropTarget(e), files = e.dataTransfer && e.dataTransfer.files;
+  if (!files || !files.length) return;
+  if (!t) { if (location.hash !== "#tai-len") location.hash = "tai-len"; toast("Thả file vào đúng ô: file tổng hợp, BANK STATEMENT hoặc ô của acquirer."); return; }
+  if (t.id === "drop") handleFiles(files); else uploadFiles(files, t.dataset.sec, t.dataset.acq);
+});
+
+/* ------------------------------------------------------------------ summary workbook (mẫu AITS) */
+function ingest(buf, name) {
+  var job = { id: rid(), name: name, state: "parsing", buf: buf };
+  S.jobs.unshift(job); renderJobs();
+  try {
+    var grids = gridsFrom(buf), sm = normMonth(FeeParser.parseWorkbook(grids, name));
+    if (!sm.key) throw new Error("Không xác định được kỳ báo cáo (ô Kỳ báo cáo ở sheet Tham số & tỷ giá).");
+    var tr = parseTerms(grids); sm.terms = tr.terms; sm.hol = tr.hol; sm.batches = parseBatches(grids);
+    job.sum = sm; job.state = "ready"; job.size = JSON.stringify(sm).length;
+    S.temp[sm.key] = sm; if (!S.cur || !S.saved[S.cur]) S.cur = sm.key;
+    if (!load("upm")) S.upMonth = sm.key;
+    if (!S.db) S.tempFiles["th-" + sm.key] = { id: "th-" + sm.key, m: sm.key, f: yymm(sm.key) + " data", sec: "TONG HOP", acq: "", name: name, ext: extOf(name), size: buf.byteLength, at: new Date().toISOString(), local: 1, buf: buf, nb: 0 };
+  } catch (e) { job.state = "error"; job.err = e.message || String(e); }
+  renderJobs(); renderPicker(); renderAll();
+  return job;
+}
+window.FeeApp = { ingest: ingest, uploadFiles: uploadFiles, normMonth: normMonth };
+function handleFiles(list) {
+  if (!isUnlocked()) { applyLock(); toast("Đăng nhập ở trang Tải file trước khi tải file (phiên hết hạn sau 10 phút)."); location.hash = "tai-len"; return; }
+  Array.from(list || []).forEach(function (f) {
+    if (!/\.xls[xm]?$/i.test(f.name)) { S.jobs.unshift({ id: rid(), name: f.name, state: "error", err: "File tổng hợp phải là Excel (.xlsx, .xls). File .md/.csv hãy thả vào ô BANK STATEMENT hoặc ô acquirer." }); renderJobs(); return; }
+    readFile(f).then(function (b) { ingest(b, f.name); }, function (e) { S.jobs.unshift({ id: rid(), name: f.name, state: "error", err: e.message }); renderJobs(); });
+  });
+}
+function renderJobs() {
+  var el = $("#jobs");
+  el.innerHTML = S.jobs.map(function (j) {
+    if (j.state === "parsing") return '<div class="job"><div class="job-head"><b>' + esc(j.name) + '</b><span class="chip c-info">Đang đọc…</span></div></div>';
+    if (j.state === "error") return '<div class="job"><div class="job-head"><b>' + esc(j.name) + '</b><span class="chip c-crit">Không đọc được</span></div><p class="warnlist" style="list-style:none;padding:0;color:var(--color-crit)">' + esc(j.err) + "</p></div>";
+    var s = j.sum, t = s.total || {}, exists = !!S.saved[s.key];
+    var act;
+    if (j.state === "saved") act = '<span class="chip c-good">Đã lưu vào sổ</span>';
+    else if (j.state === "saving") act = '<span class="chip c-info">Đang lưu…</span>';
+    else if (!S.db) act = '<span class="note">Kho dữ liệu chưa mở được ở chế độ xem này, số liệu chỉ hiển thị tạm trên máy bạn.</span>';
+    else if (S.canWrite === false) act = '<span class="note">Bạn chỉ có quyền xem, không lưu được vào sổ.</span>';
+    else if (j.confirm) act = '<span class="note">Kỳ ' + esc(monthLabel(s.key)) + ' đã có trong sổ. Ghi đè bằng file này?</span><button class="btn danger" data-act="save" data-id="' + j.id + '">Ghi đè</button><button class="btn" data-act="cancel" data-id="' + j.id + '">Thôi</button>';
+    else act = '<button class="btn primary" data-act="save" data-id="' + j.id + '">' + (exists ? "Thay kỳ " : "Lưu kỳ ") + esc(monthLabel(s.key)) + '</button><a class="btn" href="#tong-quan">Xem tổng quan</a>';
+    return '<div class="job"><div class="job-head"><b>' + esc(j.name) + '</b><span class="chip c-good">Kỳ ' + esc(monthLabel(s.key)) + " · thư mục " + esc(yymm(s.key)) + " data</span></div>" +
+      '<div class="facts"><span>Số GD <b>' + nf(t.gd) + "</b></span><span>Doanh số <b>" + money(t.ds) + "</b></span><span>Phí <b>" + money(t.fee) + "</b></span><span>Tỷ lệ <b>" + pct(rate(t.fee, t.ds)) + "</b></span><span>Acquirer <b>" + s.acq.length + "</b></span><span>Dòng chi tiết <b>" + s.det.length + "</b></span><span>Đợt chi trả <b>" + nf((s.batches || []).length) + "</b></span></div>" +
+      (s.warn && s.warn.length ? '<ul class="warnlist">' + s.warn.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul>" : "") +
+      (j.err ? '<p class="warnlist" style="list-style:none;padding:0;color:var(--color-crit)">' + esc(j.err) + "</p>" : "") +
+      '<div class="actions">' + act + "</div></div>";
+  }).join("");
+}
+$("#jobs").addEventListener("click", function (e) {
+  var b = e.target.closest("button[data-act]"); if (!b) return;
+  var j = S.jobs.filter(function (x) { return x.id === b.dataset.id; })[0]; if (!j) return;
+  if (b.dataset.act === "cancel") { j.confirm = false; renderJobs(); return; }
+  if (S.saved[j.sum.key] && !j.confirm) { j.confirm = true; renderJobs(); return; }
+  saveJob(j);
+});
+function saveJob(j) {
+  if (j.size > 250000) { j.err = "Bản tóm tắt quá lớn để lưu (" + nf(j.size / 1024) + " KB, giới hạn 250 KB)."; renderJobs(); return; }
+  j.state = "saving"; j.confirm = false; j.err = ""; renderJobs();
+  var body = JSON.parse(JSON.stringify(j.sum)); body.savedAt = new Date().toISOString();
+  S.db.collection("months").doc(j.sum.key).set(body).then(function () {
+    j.state = "saved"; delete S.temp[j.sum.key]; toast("Đã lưu kỳ " + monthLabel(j.sum.key)); renderJobs(); archiveSummary(j);
+  }, function (e) {
+    j.state = "ready"; j.err = errMsg(e);
+    if (e && e.code === "invalid_argument") S.canWrite = false;
+    renderJobs();
+  });
+}
+function archiveSummary(j) {
+  if (!S.db || !j.buf) return;
+  capsReady().then(function () {
+    if (!S.assets) return;
+    var key = j.sum.key, ext = extOf(j.name) || "xlsx", id = "th-" + key, old = S.files[id];
+    return storeBlob(j.buf, ext, j.name).then(function (res) {
+      return ensureFolder(key).then(function () {
+        return S.db.collection("files").doc(id).set({ m: key, f: yymm(key) + " data", sec: "TONG HOP", acq: "", name: j.name.slice(0, 180), ext: ext, size: j.buf.byteLength, at: new Date().toISOString(), asset: res.id, wrap: res.wrap, nb: 0 });
+      }).then(function () {
+        if (old && old.asset && old.asset !== res.id) S.assets.delete(old.asset).catch(function () {});
+        toast("Đã cất file gốc vào " + yymm(key) + " data");
+      }, function (e) { S.assets.delete(res.id).catch(function () {}); throw e; });
+    });
+  }).catch(function (e) { toast("Kỳ đã lưu nhưng chưa cất được file gốc: " + errMsg(e)); });
+}
+function renderSaved() {
+  var el = $("#saved"), keys = Object.keys(S.saved).sort().reverse();
+  if (S.dbState === "loading") { el.innerHTML = '<p class="note">Đang tải…</p>'; return; }
+  if (!S.db) { el.innerHTML = '<p class="note">Kho dữ liệu không mở được ở chế độ xem này (cần đăng nhập claude.ai). Bạn vẫn có thể thả file để xem tạm.</p>'; return; }
+  if (!keys.length) { el.innerHTML = '<p class="note">Chưa có kỳ nào. Thả file tổng hợp tháng ở ô bên trên rồi bấm Lưu.</p>'; return; }
+  el.innerHTML = table([{ h: "Kỳ" }, { h: "File nguồn" }, { h: "Doanh số", n: 1 }, { h: "Tổng phí", n: 1 }, { h: "Tỷ lệ", n: 1 }, { h: "Lưu lúc" }, { h: "" }],
+    keys.map(function (k) {
+      var s = S.saved[k], t = s.total || {}, del = S.canWrite === false ? "" : (S.delKey === k ? '<span class="note">Xoá kỳ này khỏi sổ?</span> <button class="btn danger" data-del="' + k + '" data-ok="1">Xoá</button> <button class="btn" data-del="">Thôi</button>' : '<button class="btn" data-del="' + k + '">Xoá</button>');
+      return "<tr><td><b>" + esc(monthLabel(k)) + '</b></td><td class="note">' + esc(s.file) + '</td><td class="n">' + money(t.ds) + '</td><td class="n">' + money(t.fee) + '</td><td class="n">' + pct(rate(t.fee, t.ds)) + '</td><td class="note">' + (s.savedAt ? esc(new Date(s.savedAt).toLocaleString("vi-VN")) : "—") + '</td><td class="n">' + del + "</td></tr>";
+    }));
+}
+$("#saved").addEventListener("click", function (e) {
+  var b = e.target.closest("button[data-del]"); if (!b) return;
+  var k = b.dataset.del;
+  if (!k) { S.delKey = null; renderSaved(); return; }
+  if (!b.dataset.ok) { S.delKey = k; renderSaved(); return; }
+  S.delKey = null;
+  S.db.collection("months").doc(k).delete().then(function () { toast("Đã xoá kỳ " + monthLabel(k)); }, function () { toast("Không xoá được kỳ " + monthLabel(k)); });
+});
+var drop = $("#drop"), fin = $("#file-in");
+drop.addEventListener("click", function () { fin.click(); });
+drop.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fin.click(); } });
+fin.addEventListener("change", function () { handleFiles(fin.files); fin.value = ""; });
+
+/* ------------------------------------------------------------------ picker, routing, boot */
+function renderPicker() {
+  var keys = Object.keys(allMonths()).sort().reverse();
+  if (S.cur && keys.indexOf(S.cur) < 0) S.cur = null;
+  if (!S.cur) { var want = load("cur"); S.cur = keys.indexOf(want) >= 0 ? want : keys[0] || null; }
+  var older = keys.filter(function (k) { return k < S.cur; });
+  if (S.prev === undefined || S.prev === null || keys.indexOf(S.prev) < 0 || S.prev >= S.cur) S.prev = older[0] || null;
+  $("#sel-month").innerHTML = keys.length ? keys.map(function (k) { return '<option value="' + k + '"' + (k === S.cur ? " selected" : "") + ">" + monthLabel(k) + (S.saved[k] ? "" : " (chưa lưu)") + "</option>"; }).join("") : "<option>Chưa có kỳ</option>";
+  $("#sel-prev").innerHTML = '<option value="">Không so sánh</option>' + keys.filter(function (k) { return k !== S.cur; }).map(function (k) { return '<option value="' + k + '"' + (k === S.prev ? " selected" : "") + ">" + monthLabel(k) + "</option>"; }).join("");
+  if (!S.upMonth) S.upMonth = load("upm") || S.cur || null;
+}
+$("#sel-month").onchange = function (e) { S.cur = e.target.value; store("cur", S.cur); S.prev = null; renderPicker(); renderAll(); };
+$("#sel-prev").onchange = function (e) { S.prev = e.target.value || ""; renderAll(); };
+var VIEWS = { "tong-quan": vOverview, "cong": vGates, "hang-the": vBrands, "doi-soat": vRecon, "bin": vBin, "adyen-card": vAdyenCard, "vcb-card": vVcbCard, "tai-len": function () { renderJobs(); renderSaved(); renderUpload(); renderUpLog(); } };
+function route() {
+  var v = (location.hash || "").replace("#", "");
+  if (v === "hop-dong") v = "doi-soat";
+  if (!VIEWS[v]) v = "tong-quan";
+  document.querySelectorAll(".view[data-v]").forEach(function (s) { s.hidden = s.dataset.v !== v; });
+  document.querySelectorAll("nav.tabs a").forEach(function (a) { if (a.dataset.view === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  var cur = document.querySelector('nav.tabs a[data-view="' + v + '"]'); if (cur) $("#page-title").textContent = cur.textContent;
+  try { VIEWS[v](); }
+  catch (e) {
+    var sec = $("#v-" + v);
+    if (sec) sec.innerHTML = '<div class="empty"><strong>Trang này gặp lỗi khi hiển thị số liệu kỳ ' + esc(monthLabel(S.cur)) + '</strong><span class="note">' + esc(e && e.message) + "</span></div>";
+    if (window.console) console.error(e);
+  }
+  return v;
+}
+function renderAll() { document.body.classList.toggle("ch-bsp", chan() === "BSP"); route(); renderShell(); }
+function setStatus(t, err) {
+  $("#status").textContent = t || "Sẵn sàng";
+  $("#dot").className = "dot" + (err ? " err" : (S.dbState === "loading" ? " busy" : ""));
+}
+function goMonth(k) { if (!k) return; S.cur = k; store("cur", k); S.prev = null; renderPicker(); renderAll(); }
+function renderShell() {
+  var ms = allMonths(), keys = Object.keys(ms).sort(), m = M(), p = P(), i = keys.indexOf(S.cur);
+  document.querySelectorAll("#chan-seg button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.chan === chan())); });
+  $("#pg-label").textContent = m ? monthLabel(m.key) : "—";
+  $("#pg-prev").disabled = i <= 0; $("#pg-next").disabled = i < 0 || i >= keys.length - 1;
+  $("#rail-list").innerHTML = keys.slice().reverse().map(function (k) {
+    var t = totOf(ms[k]) || {}, r = rate(t.fee, t.ds), w = Math.min(100, (r || 0) / 0.035 * 100);
+    return '<button type="button" class="thumb" data-k="' + k + '"' + (k === S.cur ? ' aria-current="true"' : "") + ' title="Mở kỳ ' + esc(monthLabel(k)) + '">' +
+      '<span class="pg"><b>' + esc(monthLabel(k)) + "</b><i>" + money(t.ds) + " · " + pct(r) + '</i><span class="ln" style="width:' + w.toFixed(0) + '%"></span></span>' +
+      '<span class="lab' + (S.saved[k] ? "" : " no") + '">' + (S.saved[k] ? "Đã lưu" : "Chưa lưu") + "</span></button>";
+  }).join("") || '<span class="hint">Chưa có kỳ nào.</span>';
+  var t = totOf(m), pt = totOf(p);
+  $("#stats").textContent = t ? chanLabel() + " · " + nf(t.gd) + " GD · " + money(t.ds) + " · phí " + money(t.fee) + " · " + pct(rate(t.fee, t.ds)) : "";
+  $("#meta-info").textContent = m ? "Kỳ " + monthLabel(m.key) + " · " + chanLabel() + " · " + (m.file || "") + " · " + m.acq.filter(acqF).length + " acquirer · " + m.det.filter(detF).length + " dòng chi tiết" : "Chưa có kỳ nào mở";
+  if (!m) { $("#side-sum").innerHTML = '<span class="hint">Chưa có kỳ nào. Thả file tổng hợp tháng để bắt đầu.</span>'; $("#side-alerts").innerHTML = ""; $("#side-about").innerHTML = ""; return; }
+  function row(lab, v, pv, isRate, fmt) {
+    var d = pv == null || !isFinite(pv) || !pv ? "" : isRate ? ((v - pv) * 10000 > 0 ? "+" : "") + nf((v - pv) * 10000, 1) + " bps" : ((v - pv) / Math.abs(pv) * 100 > 0 ? "+" : "") + nf((v - pv) / Math.abs(pv) * 100, 1) + "%";
+    return "<dt>" + lab + "</dt><dd>" + fmt(v) + (d ? "<small>" + d + " so với " + esc(monthLabel(S.prev)) + "</small>" : "") + "</dd>";
+  }
+  $("#side-sum").innerHTML = '<p class="hint" style="margin:0">Phạm vi: ' + chanLabel() + '</p><dl class="kv">' +
+    row("Doanh số bán", t.ds, pt && pt.ds, false, function (x) { return money(x); }) +
+    row("Tổng phí", t.fee, pt && pt.fee, false, function (x) { return money(x); }) +
+    row("Tỷ lệ phí BQ", rate(t.fee, t.ds), pt && rate(pt.fee, pt.ds), true, function (x) { return pct(x); }) +
+    row("Số GD bán", t.gd, pt && pt.gd, false, function (x) { return nf(x); }) +
+    row("Hoàn + chargeback", t.refund, pt && pt.refund, false, function (x) { return money(x); }) + "</dl>";
+  var cr = m.det.filter(function (d) { return d.d != null && detF(d); });
+  var over = cr.filter(function (d) { return d.f - d.d > Math.max(5000, d.d * 0.005); });
+  var acqs = m.acq.filter(acqF);
+  var nofee = acqs.filter(function (a) { return a.ds > 0 && !a.fee; });
+  var high = acqs.filter(function (a) { return a.ds > 0 && rate(a.fee, a.ds) >= 0.035; });
+  var rc = reconOf(m).filter(function (e) { return !chan() || chOfAcqName(m, e.a) === chan(); }), late = rc.filter(function (e) { return e.st === "late"; });
+  var items = [];
+  if (late.length) items.push(['<span class="chip c-crit">' + late.length + "</span>", '<a href="#doi-soat">Đợt tiền về chậm so với T+ trong hợp đồng</a>']);
+  if (over.length) items.push(['<span class="chip c-crit">' + over.length + "</span>", '<a href="#doi-soat">Dòng thu vượt hợp đồng, cộng ' + money(sum(over, "f") - sum(over, "d")) + "</a>"]);
+  if (nofee.length) items.push(['<span class="chip c-warn">' + nofee.length + "</span>", '<a href="#cong">Chưa có phí thực thu: ' + esc(nofee.map(function (a) { return a.acq; }).join(", ")) + "</a>"]);
+  if (high.length) items.push(['<span class="chip c-crit">' + high.length + "</span>", '<a href="#cong">Acquirer có tỷ lệ phí từ 3,5%: ' + esc(high.map(function (a) { return a.acq; }).join(", ")) + "</a>"]);
+  $("#side-alerts").innerHTML = items.length ? '<ul class="alert-list">' + items.map(function (x) { return "<li>" + x[0] + "<span>" + x[1] + "</span></li>"; }).join("") + "</ul>" : '<span class="hint">Không có điểm bất thường.</span>';
+  var mf = filesOf(m.key);
+  $("#side-about").innerHTML = '<dl class="kv"><dt>File nguồn</dt><dd style="font-weight:500;overflow-wrap:anywhere">' + esc(m.file || "—") + "</dd><dt>Lưu lúc</dt><dd>" +
+    (m.savedAt ? esc(new Date(m.savedAt).toLocaleString("vi-VN")) : "Chưa lưu") + "</dd><dt>Thư mục</dt><dd>" + esc(yymm(m.key)) + " data · " + mf.length + " file</dd><dt>Đợt chi trả</dt><dd>" + nf(batchesOf(m.key).length) + "</dd><dt>Cảnh báo khi đọc</dt><dd>" + (m.warn ? m.warn.length : 0) + "</dd></dl>" +
+    '<span class="hint">Số tiền quy VND theo tỷ giá trong sheet Tham số &amp; tỷ giá của từng kỳ.</span>';
+}
+$("#chan-seg").addEventListener("click", function (e) { var b = e.target.closest("button[data-chan]"); if (b) setChan(b.dataset.chan); });
+$("#pg-prev").onclick = function () { var k = Object.keys(allMonths()).sort(), i = k.indexOf(S.cur); goMonth(k[i - 1]); };
+$("#pg-next").onclick = function () { var k = Object.keys(allMonths()).sort(), i = k.indexOf(S.cur); goMonth(k[i + 1]); };
+$("#rail-list").addEventListener("click", function (e) { var b = e.target.closest("button.thumb"); if (b) goMonth(b.dataset.k); });
+window.addEventListener("hashchange", route);
+try { S.termO = JSON.parse(load("terms") || "{}") || {}; } catch (e) { S.termO = {}; }
+S.upMonth = load("upm") || null;
+try { var la = JSON.parse(load("auth") || "null"); if (la && la.u && la.h) S.auth = { u: la.u, h: la.h }; } catch (e) {}
+S.wasOk = isUnlocked(); applyLock();
+renderPicker(); renderAll();
+
+var timer = setTimeout(function () { if (S.dbState === "loading") setStatus("Chưa kết nối được kho dữ liệu đã lưu. Số liệu sẽ hiện khi kết nối được; bạn vẫn có thể thả file để xem tạm."); }, 10000);
+var C = window.claude;
+if (!C || !C.use) { S.dbState = "none"; S.capsDone = 1; clearTimeout(timer); setStatus("Trang đang mở ngoài claude.ai nên không có kho dữ liệu đã lưu. Thả file ở trang Tải file để xem tạm."); renderPicker(); renderAll(); }
+else {
+  var guard = function (p) { return Promise.race([p, new Promise(function (r) { setTimeout(function () { r(null); }, 11000); })]).catch(function () { return null; }); };
+  S.caps = Promise.all([guard(C.use("assets")).then(function (a) { S.assets = a || null; }), guard(C.use("downloads")).then(function (d) { S.dl = d || null; })])
+    .then(function () { S.capsDone = 1; renderAll(); });
+  C.use("user").then(function (u) { if (u && u.can) return u.can("data.write").then(function (v) { S.canWrite = v; renderAll(); }); }).catch(function () {});
+  C.use("db").then(function (db) {
+    if (!db) { S.dbState = "none"; clearTimeout(timer); setStatus("Kho dữ liệu không mở được ở chế độ xem này (cần đăng nhập claude.ai). Thả file ở trang Tải file để xem tạm."); renderPicker(); renderAll(); return; }
+    S.db = db;
+    db.collection("months").onSnapshot(function (snap) {
+      var o = {}; snap.docs.forEach(function (d) { if (!d.exists) return; var x = d.data(); try { x = normMonth(x); } catch (e) { if (window.console) console.error(e); } o[d.id] = x; });
+      S.saved = o;
+      if (!snap.metadata.fromCache) { S.dbState = "ready"; clearTimeout(timer); setStatus(Object.keys(o).length ? "" : "Sổ chưa có kỳ nào. Thả file tổng hợp tháng ở trang Tải file để bắt đầu."); }
+      renderPicker(); renderAll();
+    }, function () { S.dbState = "error"; clearTimeout(timer); setStatus("Mất kết nối với kho dữ liệu. Tải lại trang sau ít phút.", true); renderAll(); });
+    db.collection("files").onSnapshot(function (snap) {
+      var o = {}; snap.docs.forEach(function (d) { if (d.exists) { var x = d.data(); x._id = d.id; x.id = d.id; o[d.id] = x; } });
+      S.files = o; renderAll();
+    }, function () {});
+    db.collection("folders").onSnapshot(function (snap) {
+      var o = {}; snap.docs.forEach(function (d) { if (d.exists) o[d.id] = d.data(); });
+      S.folders = o; renderAll();
+    }, function () {});
+    db.collection("config").onSnapshot(function (snap) {
+      snap.docs.forEach(function (d) {
+        if (d.exists && d.id === "terms") { var x = d.data(); S.termO = (x && x.o) || {}; store("terms", JSON.stringify(S.termO)); }
+        if (d.exists && d.id === "auth") { var y = d.data(); if (y && y.u && y.h) S.auth = { u: y.u, h: y.h }; }
+      });
+      applyLock();
+      renderAll();
+    }, function () {});
+  });
+}
+})();
+</script>
+
+</body></html>
