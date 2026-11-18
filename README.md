@@ -16,3 +16,5 @@ Trang theo dõi phí thanh toán thẻ và ví theo tháng, chia kênh ECOM / BS
 - Mở bằng trình duyệt, cần internet để tải thư viện đọc Excel (SheetJS) và phông chữ.
 - Bản HTML không lưu dữ liệu: file thả vào chỉ được đọc tạm trên máy người xem.
 - Mật khẩu trang Tải file (mặc định `admin` / `admin`) chỉ là khoá giao diện, không phải bảo mật.
+## Bản web (thư mục `app/`)
+Bản chạy trên máy chủ, có database, đăng nhập và nhận file tự động. Chạy được trên Cloudflare (Workers + D1 + R2 + Access) hoặc trên máy local (Node + SQLite). Có webhook Adyen, nhận báo cáo qua email và agent Python kéo file từ SFTP / thư mục. Xem [`app/README.md`](app/README.md).

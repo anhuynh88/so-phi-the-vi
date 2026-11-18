@@ -1,0 +1,50 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "so-phi",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Giao diện tĩnh. Mọi đường đều chạy qua Worker trước để kiểm tra đăng nhập
+  // (AUTH_MODE=basic không có Access đứng trước). Nếu chuyển sang Access có thể thu hẹp lại
+  // thành ["/api/*", "/_blob/*", "/webhooks/*"].
+  // Không bật "single-page-application": trang dùng #hash để chuyển mục.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "so-phi",
+      // tạo bằng: npx wrangler d1 create so-phi
+      "database_id": "e256b4db-a970-4dfb-813c-6e560f0e0971",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Kho file: đang dùng KV vì tài khoản chưa bật R2 (R2 cần khai thanh toán). KV free: 1 GB, 25 MB/file, 1.000 lần ghi/ngày.
+  // Khi đã bật R2: npx wrangler r2 bucket create so-phi-files, bỏ chú thích dòng r2_buckets bên dưới rồi deploy lại.
+  // Worker ưu tiên R2 nếu có; file đã lưu trong KV cần chép sang R2 trước khi gỡ KV.
+  // "r2_buckets": [{ "binding": "FILES", "bucket_name": "so-phi-files" }],
+  "kv_namespaces": [{ "binding": "FILES_KV", "id": "83848edc33154a5bae205e92a1867de1" }],
+
+  // thử lại báo cáo Adyen / email lỗi mỗi giờ
+  "triggers": { "crons": ["17 * * * *"] },
+
+  "observability": { "enabled": true },
+
+  // Biến không bí mật. Bí mật (LOCAL_USERS, INGEST_TOKEN, ADYEN_*) đặt bằng: npx wrangler secret put <TÊN>
+  // AUTH_MODE khi deploy: "basic" (tài khoản trong secret LOCAL_USERS, không cần Zero Trust / thẻ)
+  // hoặc "access" (Cloudflare Access). Chế độ dev chỉ đặt trong .dev.vars.
+  "vars": {
+    "AUTH_MODE": "basic",
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "WRITER_EMAILS": "admin",
+    "ADYEN_ACQ": "adyen",
+    "MAX_UPLOAD_MB": "50"
+  }
+}

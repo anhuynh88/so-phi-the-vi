@@ -1,0 +1,45 @@
+{
+  "agent_name": "may-ke-toan-01",
+  "targets": [
+    { "url": "http://127.0.0.1:8788", "token_env": "SOPHI_LOCAL_TOKEN" },
+    {
+      "url": "https://so-phi.congty.vn",
+      "token_env": "SOPHI_CLOUD_TOKEN",
+      "access_client_id_env": "SOPHI_ACCESS_ID",
+      "access_client_secret_env": "SOPHI_ACCESS_SECRET"
+    }
+  ],
+  "sources": [
+    {
+      "name": "VNPay đối soát (Outlook lưu file đính kèm)",
+      "type": "folder",
+      "path": "D:\\BaoCao\\VNPay",
+      "pattern": "*.xlsx",
+      "sec": "ECOM",
+      "acq": "vnpay",
+      "month": "mtime-1"
+    },
+    {
+      "name": "Sao kê VCB",
+      "type": "folder",
+      "path": "D:\\BaoCao\\SaoKe",
+      "pattern": "*",
+      "sec": "BANK STATEMENT",
+      "acq": "",
+      "month": "filename"
+    },
+    {
+      "name": "MoMo SFTP",
+      "type": "sftp",
+      "host": "sftp.vi-du-momo.vn",
+      "user": "congty",
+      "key_file": "C:\\Users\\ketoan\\.ssh\\momo_ed25519",
+      "known_hosts": "C:\\Users\\ketoan\\.ssh\\known_hosts",
+      "remote_dir": "/outbox",
+      "pattern": "*.csv",
+      "sec": "ECOM",
+      "acq": "momo",
+      "month": "filename"
+    }
+  ]
+}
