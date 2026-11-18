@@ -1,0 +1,8 @@
+# Chép thành .dev.vars để chạy `npm run dev` (wrangler dev). File này KHÔNG commit, KHÔNG deploy.
+# Chế độ dev bỏ qua đăng nhập, chỉ chạy trên localhost.
+AUTH_MODE=dev
+DEV_USER=ban@congty.vn
+INGEST_TOKEN=doi-thanh-chuoi-ngau-nhien-dai-it-nhat-24-ky-tu
+ADYEN_WEBHOOK_USER=adyen-webhook
+ADYEN_WEBHOOK_PASS=doi-mat-khau-webhook
+ADYEN_HMAC_KEY=44782DEF547AAA06C910C43932B1EB0C71FC68D9D0C057550C48EC2ACF6BA056
