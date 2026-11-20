@@ -97,7 +97,8 @@ def push(target, src, name, month, data, sha, agent_name):
     token = os.environ.get(target.get("token_env", "SOPHI_INGEST_TOKEN"), "")
     if not token:
         raise RuntimeError(f"Thiếu biến môi trường {target.get('token_env', 'SOPHI_INGEST_TOKEN')} (INGEST_TOKEN của máy chủ)")
-    headers = {"Authorization": "Bearer " + token, "Content-Type": "application/octet-stream"}
+    # User-Agent riêng: Cloudflare chặn chữ ký mặc định "Python-urllib" (lỗi 1010)
+    headers = {"Authorization": "Bearer " + token, "Content-Type": "application/octet-stream", "User-Agent": "sophi-agent/1.0"}
     # máy chủ Cloudflare đặt sau Access: thêm service token
     if target.get("access_client_id_env"):
         headers["CF-Access-Client-Id"] = os.environ.get(target["access_client_id_env"], "")

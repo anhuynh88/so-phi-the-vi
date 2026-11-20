@@ -1,5 +1,6 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import type { Config, User } from "./types";
+import type { Config, SqlDb, User } from "./types";
+import { viaJwt } from "./session";
 import { fromB64, HttpError, safeEqual, b64 } from "./util";
 
 /* Đăng nhập. Mặc định từ chối: thiếu cấu hình hoặc token sai đều trả lỗi, không có đường lui "cho qua". */
@@ -56,7 +57,7 @@ async function pbkdf2(password: string, salt: Uint8Array, iterations: number): P
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
   return new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: salt as BufferSource, iterations }, key, 256));
 }
-async function verifyPassword(password: string, stored: string): Promise<boolean> {
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const m = /^pbkdf2\$(\d+)\$([A-Za-z0-9+/=]+)\$([A-Za-z0-9+/=]+)$/.exec(stored);
   if (!m) return false;
   const got = await pbkdf2(password, fromB64(m[2]), +m[1]);
@@ -92,8 +93,12 @@ async function viaBasicSlow(req: Request, cfg: Config): Promise<User> {
   return { email, canWrite: writerOf(cfg, email), via: "basic" };
 }
 
-export async function authenticate(req: Request, cfg: Config): Promise<User> {
+export async function authenticate(req: Request, cfg: Config, db?: SqlDb): Promise<User> {
   const mode = (cfg.AUTH_MODE || "").toLowerCase();
+  if (mode === "jwt") {
+    if (!db) throw new HttpError(503, "auth_not_configured", "Chế độ jwt cần database.");
+    return viaJwt(req, cfg, db);
+  }
   if (mode === "access") return viaAccess(req, cfg);
   if (mode === "basic") return viaBasic(req, cfg);
   if (mode === "dev") {
@@ -101,7 +106,7 @@ export async function authenticate(req: Request, cfg: Config): Promise<User> {
     if (!isLocalHost(new URL(req.url)) || !cfg.DEV_USER) throw new HttpError(403, "forbidden", "Chế độ dev chỉ dùng trên localhost.");
     return { email: cfg.DEV_USER, canWrite: cfg.DEV_READONLY !== "1", via: "dev" };
   }
-  throw new HttpError(503, "auth_not_configured", "Chưa đặt AUTH_MODE (access | basic | dev).");
+  throw new HttpError(503, "auth_not_configured", "Chưa đặt AUTH_MODE (jwt | access | basic | dev).");
 }
 
 /** Token cho agent đẩy file: Authorization: Bearer <INGEST_TOKEN> */

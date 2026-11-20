@@ -16,7 +16,12 @@
       // phiên Cloudflare Access hết hạn: fetch bị chuyển sang trang đăng nhập (HTML)
       if (r.ok && /^\/api\//.test(url) && ct.indexOf("json") < 0) { var e0 = new Error("Phiên đăng nhập đã hết hạn. Tải lại trang (F5) để đăng nhập lại."); e0.code = "auth"; throw e0; }
       if (r.ok) return ct.indexOf("json") >= 0 ? r.json() : r.text();
-      return r.json().catch(function () { return null; }).then(function (j) { throw fail(r, j); });
+      return r.json().catch(function () { return null; }).then(function (j) {
+        // đăng nhập bằng form (jwt): phiên hết hạn → về trang đăng nhập; mật khẩu tạm → trang đổi mật khẩu
+        if (r.status === 401 && !r.headers.get("www-authenticate")) location.replace("/login.html?next=" + encodeURIComponent(location.pathname + location.hash));
+        if (r.status === 403 && j && j.code === "must_change_password") location.replace("/account.html?first=1");
+        throw fail(r, j);
+      });
     }, function () {
       var e = new Error("Không kết nối được máy chủ hoặc phiên đăng nhập đã hết hạn. Tải lại trang (F5).");
       e.code = "network"; throw e;

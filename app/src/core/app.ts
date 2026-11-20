@@ -6,8 +6,10 @@ import { addIngestedFile, createBlob, del, deleteBlobIfUnused, getBlob, isCol, l
 import { downloadReport, handleWebhook } from "./adyen";
 import { processEmail } from "./email";
 import { HttpError, csvCell, isMonth, sha256Hex } from "./util";
+import { mountAccounts, mountPublicAuth } from "./accounts";
 
-export function createApp(platformOf: (c: Context) => Platform) {
+/** mount: cho từng nền tảng gắn thêm đường /api riêng (sau bước đăng nhập, trước trang 404 của /api). */
+export function createApp(platformOf: (c: Context) => Platform, mount?: (app: Hono<AppEnv>, needWrite: (c: Context<AppEnv>) => void) => void) {
   const app = new Hono<AppEnv>();
 
   app.onError((err, c) => {
@@ -59,14 +61,23 @@ export function createApp(platformOf: (c: Context) => Platform) {
     return c.json(r);
   });
 
+  // đăng nhập / đăng xuất bằng form (AUTH_MODE=jwt)
+  mountPublicAuth(app);
+
   /* ---------------- mọi đường còn lại: phải đăng nhập */
 
+  // tài khoản phải đổi mật khẩu (mật khẩu tạm): chỉ được xem mình là ai và đổi mật khẩu
+  const MUST_CHANGE_OK = new Set(["/api/me", "/api/auth/password", "/api/auth/logout-all"]);
   app.use("/api/*", async (c, next) => {
-    c.set("user", await authenticate(c.req.raw, c.get("p").cfg));
+    const u = await authenticate(c.req.raw, c.get("p").cfg, c.get("p").db);
+    if (u.mustChange && !MUST_CHANGE_OK.has(c.req.path)) throw new HttpError(403, "must_change_password", "Cần đổi mật khẩu trước khi dùng tiếp.");
+    c.set("user", u);
     await next();
   });
   app.use("/_blob/*", async (c, next) => {
-    c.set("user", await authenticate(c.req.raw, c.get("p").cfg));
+    const u = await authenticate(c.req.raw, c.get("p").cfg, c.get("p").db);
+    if (u.mustChange) throw new HttpError(403, "must_change_password", "Cần đổi mật khẩu trước khi dùng tiếp.");
+    c.set("user", u);
     await next();
   });
   const needWrite = (c: Context<AppEnv>) => {
@@ -75,8 +86,10 @@ export function createApp(platformOf: (c: Context) => Platform) {
 
   app.get("/api/me", (c) => {
     const u = c.get("user"), p = c.get("p");
-    return c.json({ email: u.email, canWrite: u.canWrite, via: u.via, mode: p.mode });
+    return c.json({ email: u.email, canWrite: u.canWrite, isAdmin: !!u.isAdmin, mustChange: !!u.mustChange, via: u.via, mode: p.mode, auth: (p.cfg.AUTH_MODE || "").toLowerCase() });
   });
+
+  mountAccounts(app);
 
   app.get("/api/rev", async (c) => c.json(await revs(c.get("p"))));
 
@@ -153,6 +166,8 @@ export function createApp(platformOf: (c: Context) => Platform) {
     else throw new HttpError(400, "invalid_argument", "Không thử lại được mục này.");
     return c.json({ ok: true });
   });
+
+  mount?.(app, needWrite);
 
   app.all("/api/*", () => { throw new HttpError(404, "not_found", "Không có API này."); });
 

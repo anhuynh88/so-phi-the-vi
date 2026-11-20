@@ -8,6 +8,11 @@ import { hmacOf, monthOfReport, reportUrlOk, signingString } from "../src/core/a
 import { dmarcPass, monthFor, processEmail, receiveEmail } from "../src/core/email";
 import { hashPassword } from "../src/core/auth";
 import { csvCell } from "../src/core/util";
+import { mountReplica, runBackup } from "../src/core/replica";
+import { Hono } from "hono";
+import type { AppEnv } from "../src/core/types";
+import { gatePage } from "../src/core/session";
+import { authenticate } from "../src/core/auth";
 import type { Config, Platform, SqlDb } from "../src/core/types";
 
 /* ---------------- nền tảng giả: SQLite trong RAM + Map làm kho file */
@@ -100,7 +105,7 @@ test("Cloudflare Access: JWT hợp lệ được vào, sai audience / sai issuer
     const get = async (tok: string) => app.request("https://so-phi.congty.vn/api/me", { headers: { "cf-access-jwt-assertion": tok } });
     const ok = await get(await sign({}));
     assert.equal(ok.status, 200);
-    assert.deepEqual(await ok.json(), { email: "ketoan@congty.vn", canWrite: true, via: "access", mode: "local" });
+    assert.deepEqual(await ok.json(), { email: "ketoan@congty.vn", canWrite: true, isAdmin: false, mustChange: false, via: "access", mode: "local", auth: "access" });
     const viewer = await (await get(await sign({ email: "nguoi-xem@congty.vn" }))).json();
     assert.equal(viewer.canWrite, false);
     assert.equal((await get(await sign({ aud: "app-khac" }))).status, 401);
@@ -267,4 +272,157 @@ test("Biểu phí: seed 6 phương thức, kiểm tra dữ liệu khi sửa", as
   assert.equal(bad.status, 400);
   const good = await app.request(H + "/api/c/contracts/lpm-wechat-2027-01-01", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...wechat, pct: 0.011, valid_from: "2027-01-01" }) });
   assert.equal(good.status, 200);
+});
+
+test("Sao lưu Cloudflare → local: chép bảng + file gốc, sai token bị từ chối, lần sau chỉ gửi phần thiếu", async () => {
+  const tok = "k".repeat(32);
+  // "Cloudflare": có 1 kỳ và 1 file do agent đẩy
+  const cloud = makePlatform({ AUTH_MODE: "dev", DEV_USER: "a@b.c", INGEST_TOKEN: "t".repeat(32) });
+  const capp = createApp(() => cloud);
+  const month = { key: "2026-10", period: "T10", det: [{ s: "x", g: "Adyen", a: "VCB", b: "VISA", v: 100, f: 2 }], acq: [], total: { ds: 100, fee: 2 } };
+  assert.equal((await capp.request(H + "/api/c/months/2026-10", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(month) })).status, 200);
+  await capp.request(H + "/api/ingest?month=2026-10&sec=ECOM&acq=vnpay&name=a.xlsx", { method: "POST", headers: { authorization: "Bearer " + "t".repeat(32) }, body: new Uint8Array([9, 8, 7]) });
+
+  // "local": app có đường nhận sao lưu, sẵn một kỳ cũ sẽ bị ghi đè
+  const local = makePlatform({ AUTH_MODE: "dev", DEV_USER: "a@b.c", BACKUP_TOKEN: tok });
+  const lapp = new Hono<AppEnv>();
+  lapp.onError((e) => new Response(String(e), { status: (e as { status?: number }).status || 500 }));
+  mountReplica(lapp, local);
+  await local.db.run("INSERT INTO folders(id, data) VALUES ('2501', '{}')");
+  const target = { fetch: (u: string, init?: RequestInit) => lapp.request(u, init) };
+
+  await assert.rejects(runBackup(cloud, target, "http://127.0.0.1:8788", "sai".repeat(10)), /401/);
+  const r1 = await runBackup(cloud, target, "http://127.0.0.1:8788", tok);
+  assert.equal(r1.skipped, false);
+  assert.equal(r1.tables!.months, 1);
+  assert.equal(r1.blobsSent, 1);
+  const lm = await local.db.all<{ key: string }>("SELECT key FROM months");
+  assert.deepEqual(lm.map((r) => r.key), ["2026-10"]);
+  assert.equal((await local.db.all("SELECT * FROM fee_lines")).length, 1);
+  assert.deepEqual((await local.db.all<{ id: string }>("SELECT id FROM folders")).map((r) => r.id), ["2610"]);
+  const blob = (await local.db.all<{ id: string }>("SELECT id FROM blobs"))[0].id;
+  assert.deepEqual([...(local.files.get("blobs/" + blob) || [])], [9, 8, 7]);
+
+  // không có gì thay đổi: bỏ qua bảng, không gửi lại file
+  const r2 = await runBackup(cloud, target, "http://127.0.0.1:8788", tok, { lastSig: r1.sig });
+  assert.equal(r2.skipped, true);
+  assert.equal(r2.blobsSent, 0);
+});
+
+test("JWT: đăng nhập form, bắt đổi mật khẩu lần đầu, đổi tên + mật khẩu, phiên cũ hết hiệu lực, khoá khi sai nhiều", async () => {
+  const boot = await hashPassword("mat-khau-ban-dau", 1000);
+  const p = makePlatform({ AUTH_MODE: "jwt", JWT_SECRET: "s".repeat(40), PBKDF2_ITER: "1000", LOCAL_USERS: "admin:" + boot, WRITER_EMAILS: "admin" });
+  const app = createApp(() => p);
+  const U = "https://so-phi.example";
+  const login = (username: string, password: string) =>
+    app.request(U + "/api/auth/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ username, password }) });
+  const cookieOf = (r: Response) => (r.headers.get("set-cookie") || "").split(";")[0];
+  const call = (path: string, cookie: string, init: RequestInit = {}) =>
+    app.request(U + path, { ...init, headers: { cookie, "content-type": "application/json", ...(init.headers || {}) } });
+
+  assert.equal((await app.request(U + "/api/me")).status, 401);
+  assert.equal((await login("admin", "sai-mat-khau-roi")).status, 401);
+  assert.equal((await login("khong-co-ai", "mat-khau-ban-dau")).status, 401);
+
+  // lần đầu: tài khoản nhập từ LOCAL_USERS, phải đổi mật khẩu
+  const r1 = await login("ADMIN", "mat-khau-ban-dau");
+  assert.equal(r1.status, 200);
+  const set = r1.headers.get("set-cookie") || "";
+  assert.match(set, /HttpOnly/); assert.match(set, /SameSite=Strict/); assert.match(set, /Secure/);
+  assert.equal((await r1.json()).mustChange, true);
+  const c1 = cookieOf(r1);
+  const me1 = await (await call("/api/me", c1)).json();
+  assert.deepEqual([me1.email, me1.isAdmin, me1.canWrite, me1.mustChange, me1.via], ["admin", true, true, true, "jwt"]);
+  assert.equal((await call("/api/c/months", c1)).status, 403); // chưa đổi mật khẩu thì chưa xem được dữ liệu
+
+  // trang tĩnh: chưa đăng nhập → /login.html; phải đổi mật khẩu → /account.html
+  const gate = (path: string, cookie?: string) => gatePage(new Request(U + path, { headers: cookie ? { cookie } : {} }), p.cfg, p.db, authenticate);
+  assert.equal((await gate("/"))!.headers.get("location"), "/login.html");
+  assert.equal(await gate("/login.html"), null);
+  assert.equal((await gate("/", c1))!.headers.get("location"), "/account.html");
+  assert.equal(await gate("/account.html", c1), null);
+
+  // đổi mật khẩu: sai mật khẩu hiện tại / mật khẩu ngắn bị từ chối; chặn request ghi từ trang khác
+  assert.equal((await call("/api/auth/password", c1, { method: "POST", body: JSON.stringify({ current: "sai", newPassword: "mat-khau-moi-dai" }) })).status, 401);
+  assert.equal((await call("/api/auth/password", c1, { method: "POST", body: JSON.stringify({ current: "mat-khau-ban-dau", newPassword: "ngan" }) })).status, 400);
+  assert.equal((await call("/api/auth/password", c1, { method: "POST", headers: { origin: "https://evil.example" }, body: JSON.stringify({ current: "mat-khau-ban-dau", newPassword: "mat-khau-moi-dai" }) })).status, 403);
+  const r2 = await call("/api/auth/password", c1, { method: "POST", body: JSON.stringify({ current: "mat-khau-ban-dau", newPassword: "mat-khau-moi-dai", newUsername: "ketoan" }) });
+  assert.equal(r2.status, 200);
+  const c2 = cookieOf(r2);
+  assert.equal((await call("/api/me", c1)).status, 401);                 // phiên cũ hết hiệu lực
+  const me2 = await (await call("/api/me", c2)).json();
+  assert.deepEqual([me2.email, me2.mustChange], ["ketoan", false]);
+  assert.equal((await call("/api/c/months", c2)).status, 200);
+  assert.equal((await gate("/", c2)), null);
+  assert.equal((await login("admin", "mat-khau-ban-dau")).status, 401);
+  assert.equal((await login("ketoan", "mat-khau-moi-dai")).status, 200);
+
+  // Basic vẫn dùng được cho script
+  assert.equal((await app.request(U + "/api/me", { headers: { authorization: "Basic " + btoa("ketoan:mat-khau-moi-dai") } })).status, 200);
+
+  // quản trị: tạo người xem (mật khẩu tạm), không tự xoá / tự bỏ quyền, còn ít nhất 1 quản trị
+  assert.equal((await call("/api/users/nguoi-xem", c2, { method: "PUT", body: JSON.stringify({ password: "mat-khau-tam-123", canWrite: false }) })).status, 200);
+  const users = (await (await call("/api/users", c2)).json()).users;
+  assert.deepEqual(users.map((u: { username: string }) => u.username), ["ketoan", "nguoi-xem"]);
+  assert.equal((await call("/api/users/ketoan", c2, { method: "DELETE" })).status, 400);
+  assert.equal((await call("/api/users/ketoan", c2, { method: "PUT", body: JSON.stringify({ isAdmin: false }) })).status, 400);
+  const rv = await login("nguoi-xem", "mat-khau-tam-123");
+  assert.equal((await rv.json()).mustChange, true);
+  const cv = cookieOf(await call("/api/auth/password", cookieOf(rv), { method: "POST", body: JSON.stringify({ current: "mat-khau-tam-123", newPassword: "nguoi-xem-mat-khau" }) }));
+  assert.equal((await call("/api/c/months/2026-10", cv, { method: "PUT", body: "{}" })).status, 403); // chỉ xem
+  assert.equal((await call("/api/users", cv)).status, 403);
+  assert.equal((await call("/api/users/nguoi-xem", c2, { method: "DELETE" })).status, 200);
+  assert.equal((await call("/api/me", cv)).status, 401);                 // xoá tài khoản thì phiên cũng mất
+
+  // sai 5 lần: khoá tạm, kể cả khi nhập đúng
+  for (let i = 0; i < 5; i++) assert.equal((await login("ketoan", "sai-" + i + "-xxxxxx")).status, 401);
+  assert.equal((await login("ketoan", "mat-khau-moi-dai")).status, 429);
+
+  // JWT giả (sai khoá ký) bị từ chối
+  const { SignJWT } = await import("jose");
+  const fake = await new SignJWT({ v: 1 }).setProtectedHeader({ alg: "HS256" }).setSubject("ketoan").setExpirationTime("1h").sign(new TextEncoder().encode("x".repeat(40)));
+  assert.equal((await call("/api/me", "sophi_s=" + fake)).status, 401);
+});
+
+test("Kéo báo cáo công ty Adyen theo lịch: tải file mới, bỏ qua 404, không tải lại file đã có", async () => {
+  const { pullCompanyReports, reportDays } = await import("../src/core/adyen");
+  const now = "2026-11-20T14:00:00Z"; // 21h VN ngày 20/11
+  assert.deepEqual(reportDays(now), ["2026-11-19", "2026-11-18", "2026-11-17"]);
+  const p = makePlatform({ ADYEN_REPORT_API_KEY: "k", ADYEN_ACQ: "adyen" });
+  const have = new Set(["settlement_detail_report_2026-11-19_2026-11-19.csv", "payments_accounting_report_2026_11_19.csv", "received_payments_report_2026_11_18.csv"]);
+  const realFetch = globalThis.fetch;
+  const calls: string[] = [];
+  globalThis.fetch = (async (url: string, init: RequestInit) => {
+    calls.push(String(url));
+    assert.equal((init.headers as Record<string, string>)["X-API-Key"], "k");
+    assert.match(String(url), /^https:\/\/ca-live\.adyen\.com\/reports\/download\/Company\/CongTyMau\//);
+    const name = String(url).split("/").pop()!;
+    return have.has(name) ? new Response("a,b\n1,2\n") : new Response("", { status: 404 });
+  }) as typeof fetch;
+  try {
+    const r = await pullCompanyReports(p, "CongTyMau", now);
+    assert.deepEqual(r.got.sort(), [...have].sort());
+    assert.equal(r.missing.length, 6);
+    assert.equal(calls.length, 9);
+    calls.length = 0;
+    const r2 = await pullCompanyReports(p, "CongTyMau", now);
+    assert.deepEqual(r2.got, []);
+    assert.equal(calls.length, 6); // chỉ thử lại các file chưa có
+  } finally { globalThis.fetch = realFetch; }
+  const f = await p.db.all<{ month: string; acq: string; source: string }>("SELECT month, acq, source FROM files");
+  assert.equal(f.length, 3);
+  assert.ok(f.every((x) => x.month === "2026-11" && x.acq === "adyen" && x.source === "adyen"));
+});
+
+test("Kéo báo cáo: key bị Adyen từ chối thì dừng ngay", async () => {
+  const { pullCompanyReports } = await import("../src/core/adyen");
+  const p = makePlatform({ ADYEN_REPORT_API_KEY: "sai" });
+  const realFetch = globalThis.fetch;
+  let n = 0;
+  globalThis.fetch = (async () => { n++; return new Response("", { status: 401 }); }) as typeof fetch;
+  try {
+    const r = await pullCompanyReports(p, "CongTyMau", "2026-11-20T14:00:00Z");
+    assert.match(r.stoppedBy || "", /401/);
+    assert.equal(n, 1);
+  } finally { globalThis.fetch = realFetch; }
 });

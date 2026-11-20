@@ -12,7 +12,9 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": true
+    "run_worker_first": true,
+    // giữ nguyên đường *.html (login.html, account.html); mặc định Cloudflare chuyển /login.html → /login
+    "html_handling": "none"
   },
 
   "d1_databases": [
@@ -20,7 +22,7 @@
       "binding": "DB",
       "database_name": "so-phi",
       // tạo bằng: npx wrangler d1 create so-phi
-      "database_id": "e256b4db-a970-4dfb-813c-6e560f0e0971",
+      "database_id": "6bf8f75e-9c01-4f9e-9631-b93a64b3e7c4",
       "migrations_dir": "migrations"
     }
   ],
@@ -29,22 +31,33 @@
   // Khi đã bật R2: npx wrangler r2 bucket create so-phi-files, bỏ chú thích dòng r2_buckets bên dưới rồi deploy lại.
   // Worker ưu tiên R2 nếu có; file đã lưu trong KV cần chép sang R2 trước khi gỡ KV.
   // "r2_buckets": [{ "binding": "FILES", "bucket_name": "so-phi-files" }],
-  "kv_namespaces": [{ "binding": "FILES_KV", "id": "83848edc33154a5bae205e92a1867de1" }],
+  "kv_namespaces": [{ "binding": "FILES_KV", "id": "693aa8a1f74c46699732f1db01f8ac74" }],
 
-  // thử lại báo cáo Adyen / email lỗi mỗi giờ
-  "triggers": { "crons": ["17 * * * *"] },
+  // Sao lưu sang máy local qua Cloudflare Tunnel "sophi-backup" (Workers VPC, không cần tên miền / địa chỉ công khai).
+  // Tạo bằng: npx wrangler tunnel create sophi-backup
+  //           npx wrangler vpc service create sophi-local --type http --tunnel-id <tunnel id> --ipv4 127.0.0.1 --http-port 8788
+  // Máy local cần chạy: npm run local (có BACKUP_TOKEN trong .env) và cloudflared cho tunnel đó. Bỏ khối này nếu không cần sao lưu.
+  "vpc_services": [{ "binding": "BACKUP", "service_id": "01a1f927-c138-7523-ac78-ad3ee6127085" }],
+
+  // "17 * * * *": thử lại báo cáo Adyen / email lỗi + sao lưu sang local, mỗi giờ
+  // "0 14 * * *": 21:00 giờ Việt Nam, kéo báo cáo cấp công ty Adyen (secret ADYEN_PULL_COMPANY = mã company account). Đổi giờ thì sửa cả PULL_CRON trong src/core/adyen.ts
+  "triggers": { "crons": ["17 * * * *", "0 14 * * *"] },
 
   "observability": { "enabled": true },
 
   // Biến không bí mật. Bí mật (LOCAL_USERS, INGEST_TOKEN, ADYEN_*) đặt bằng: npx wrangler secret put <TÊN>
-  // AUTH_MODE khi deploy: "basic" (tài khoản trong secret LOCAL_USERS, không cần Zero Trust / thẻ)
+  // AUTH_MODE khi deploy: "jwt" (đăng nhập bằng form, tài khoản trong bảng users, cần secret JWT_SECRET; lần đầu nhập tài khoản từ LOCAL_USERS),
+  // "basic" (hộp đăng nhập của trình duyệt, tài khoản trong secret LOCAL_USERS)
   // hoặc "access" (Cloudflare Access). Chế độ dev chỉ đặt trong .dev.vars.
   "vars": {
-    "AUTH_MODE": "basic",
+    "AUTH_MODE": "jwt",
+    "SESSION_HOURS": "12",
+    "PBKDF2_ITER": "5000",
     "ACCESS_TEAM_DOMAIN": "",
     "ACCESS_AUD": "",
     "WRITER_EMAILS": "admin",
     "ADYEN_ACQ": "adyen",
-    "MAX_UPLOAD_MB": "50"
+    "MAX_UPLOAD_MB": "50",
+    "BACKUP_ORIGIN": "http://127.0.0.1:8788"
   }
 }

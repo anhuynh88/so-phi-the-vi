@@ -7,6 +7,8 @@ import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createApp, runMaintenance } from "./core/app";
 import { authenticate } from "./core/auth";
+import { mountReplica } from "./core/replica";
+import { gatePage } from "./core/session";
 import type { BlobStore, Config, Platform, SqlDb } from "./core/types";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -55,12 +57,17 @@ const cfg = process.env as unknown as Config;
 const platform: Platform = { mode: "local", db, blobs, cfg, waitUntil: (p) => { p.catch((e) => console.error(e)); } };
 
 const app = createApp(() => platform);
+
+/* nhận bản sao lưu từ Worker Cloudflare (qua Tunnel / Workers VPC), xác thực bằng BACKUP_TOKEN */
+mountReplica(app, platform);
+
 /* file tĩnh trong public/ (giống phần assets của Worker) */
 const PUB = resolve(ROOT, "public");
 const STATIC_CT: Record<string, string> = { html: "text/html; charset=utf-8", js: "text/javascript; charset=utf-8", css: "text/css; charset=utf-8", svg: "image/svg+xml", png: "image/png", ico: "image/x-icon", json: "application/json" };
 app.get("*", async (c) => {
   // bản local không có Cloudflare Access đứng trước: trang cũng phải đăng nhập
-  await authenticate(c.req.raw, cfg);
+  const gate = await gatePage(c.req.raw, cfg, db, authenticate);
+  if (gate) return gate;
   let path = decodeURIComponent(new URL(c.req.url).pathname);
   if (path.endsWith("/")) path += "index.html";
   const f = resolve(PUB, "." + path);

@@ -82,7 +82,16 @@ npx wrangler secret put INGEST_TOKEN      # chuỗi ngẫu nhiên >= 24 ký tự
 npm run deploy
 ```
 
-**Đăng nhập không cần thẻ (đang dùng):** `AUTH_MODE=basic` trong `wrangler.jsonc`. Tài khoản đặt bằng
+**Đăng nhập bằng form + JWT (đang dùng):** `AUTH_MODE=jwt` trong `wrangler.jsonc` (bản local: trong `.env`).
+- Tài khoản nằm trong bảng `users` của database. Lần đầu bảng còn trống, máy chủ nhập các tài khoản trong `LOCAL_USERS` và bắt đổi mật khẩu ở lần đăng nhập đầu.
+- `npx wrangler secret put JWT_SECRET`: chuỗi ngẫu nhiên ≥ 32 ký tự, dùng để ký phiên. Đổi giá trị này thì mọi người phải đăng nhập lại.
+- `/login.html` là trang đăng nhập. `/account.html` để đổi tên đăng nhập và mật khẩu, đăng xuất, đăng xuất mọi nơi. Quản trị viên quản lý người dùng ở cùng trang: thêm người, đặt quyền chỉ xem / ghi / quản trị, đặt lại mật khẩu tạm, xoá.
+- Phiên là JWT HS256 nằm trong cookie `HttpOnly; SameSite=Strict` (thêm `Secure` khi chạy https), hạn `SESSION_HOURS` (mặc định 12 giờ). Đổi mật khẩu, đổi quyền hoặc xoá tài khoản thì phiên cũ hết hiệu lực ngay (`token_ver`).
+- Sai mật khẩu 5 lần liên tiếp thì tài khoản bị khoá 15 phút. Quản trị viên đổi quyền hoặc đặt lại mật khẩu sẽ mở khoá luôn.
+- Script (`seed.mjs`…) vẫn gửi được `Authorization: Basic` với cùng tài khoản.
+- `PBKDF2_ITER`: số vòng băm mật khẩu mới. Worker gói free để 5.000 (giới hạn 10 ms CPU), bản local mặc định 210.000.
+
+**Hộp đăng nhập của trình duyệt (cũ):** `AUTH_MODE=basic` trong `wrangler.jsonc`. Tài khoản đặt bằng
 `npm run local:user -- admin "mật khẩu" 5000`, rồi chép dòng in ra vào `npx wrangler secret put LOCAL_USERS`
 (dùng 5.000 vòng vì Worker gói free chỉ có 10 ms CPU; mật khẩu nên là chuỗi ngẫu nhiên dài). `run_worker_first: true`
 nên cả trang lẫn API đều hỏi mật khẩu.
@@ -93,6 +102,33 @@ nên cả trang lẫn API đều hỏi mật khẩu.
 3. `WRITER_EMAILS`: danh sách email được tải file và lưu kỳ, cách nhau dấu phẩy. Người khác chỉ được xem.
 4. Tạo thêm một application cho đường `/webhooks/*` với policy **Bypass** cho mọi người, vì Adyen không đăng nhập Access được. Đường này có xác thực riêng bằng Basic auth + HMAC.
 5. Agent: chọn một trong hai cách. (a) Bypass cho `/api/ingest`, vì đường này đã có Bearer token. (b) Tạo **Service Token**, thêm policy *Service Auth*, rồi khai `access_client_id_env` / `access_client_secret_env` trong `agent.json`.
+
+## Sao lưu Cloudflare về máy local (Tunnel + Workers VPC)
+
+Worker đẩy toàn bộ bảng D1 và các file gốc mà máy local chưa có sang bản local qua Cloudflare Tunnel. Việc này chạy mỗi giờ (cron phút 17), chỉ đẩy khi dữ liệu có thay đổi. Worker gọi thẳng `http://127.0.0.1:8788` qua binding `BACKUP` (Workers VPC), nên không cần tên miền và không mở địa chỉ công khai nào cho máy local.
+
+```
+Worker (cron / POST /api/backup/run) ──env.BACKUP──▶ Tunnel sophi-backup ──▶ cloudflared trên máy ──▶ 127.0.0.1:8788/_replica/*
+```
+
+Cài một lần:
+```bash
+npx wrangler tunnel create sophi-backup
+npx wrangler vpc service create sophi-local --type http --tunnel-id <tunnel id> --ipv4 127.0.0.1 --http-port 8788
+# chép service id vào "vpc_services" trong wrangler.jsonc
+# BACKUP_TOKEN: chuỗi ngẫu nhiên >= 24 ký tự, đặt GIỐNG NHAU ở .env (local) và secret của Worker
+npx wrangler secret put BACKUP_TOKEN
+npm run deploy
+```
+
+Trên máy nhận sao lưu: chạy `start-backup.bat` (mở bản local và tunnel), hoặc tự chạy `npm run local` và `npx wrangler tunnel run sophi-backup`.
+Muốn chạy nền khi bật máy: đặt hai lệnh đó vào Task Scheduler, hoặc cài cloudflared làm Windows service bằng token của tunnel.
+
+- Bản local thành **bản sao chỉ để xem / dự phòng**: mỗi lần sao lưu ghi đè các bảng của nó, nên sửa trực tiếp trên local sẽ mất.
+- File gốc chỉ gửi phần còn thiếu, tối đa 30 file mỗi lần (giới hạn subrequest gói free). Phần còn lại gửi ở các lần sau.
+- Xem trạng thái: `GET /api/backup/status`. Chạy ngay: `POST /api/backup/run` (người có quyền ghi).
+- Lúc máy local tắt, cron báo lỗi vào trạng thái. Khi máy bật lại, lần chạy kế tiếp sẽ bù đủ.
+- Có thể chép thêm thư mục `data/` của bản local ra ổ khác hoặc lên cloud để có thêm bản lưu.
 
 ## Nối Adyen (báo cáo tự động)
 
