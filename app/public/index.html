@@ -255,6 +255,7 @@ svg text { fill: var(--color-text-muted); font-size: 11px; font-family: var(--fo
     <a class="lnk" href="#doi-soat">Đối soát phí</a>
     <a class="lnk" href="#hang-the">Hãng thẻ</a>
     <a class="cta" href="#tai-len">Tải file tháng mới</a>
+    <a class="lnk" href="/account.html" id="top-acc" hidden>Tài khoản</a>
   </div>
 </header>
 
@@ -1386,9 +1387,14 @@ function isUnlocked() { return true; }
 function applyLock() {
   var me = window.SOPHI && SOPHI.me, el = $("#acc-sub"), act = $("#acc-actions");
   if (!me) { el.textContent = (window.SOPHI && SOPHI.err) || "Đang kiểm tra đăng nhập…"; act.innerHTML = ""; return; }
-  var via = { access: "Cloudflare Access", "access-service": "Cloudflare Access (service token)", basic: "tài khoản local", dev: "chế độ dev, không đăng nhập" }[me.via] || me.via;
-  el.innerHTML = "Đang đăng nhập: <b>" + esc(me.email) + "</b> qua " + esc(via) + " · " + (me.canWrite ? "được tải file và lưu kỳ" : "chỉ xem") + " · máy chủ " + (me.mode === "local" ? "local" : "Cloudflare") + ".";
-  act.innerHTML = me.via === "access" ? '<a class="btn" href="/cdn-cgi/access/logout">Đăng xuất</a>' : "";
+  var via = { jwt: "tài khoản Sổ phí", access: "Cloudflare Access", "access-service": "Cloudflare Access (service token)", basic: "tài khoản local", dev: "chế độ dev, không đăng nhập" }[me.via] || me.via;
+  el.innerHTML = "Đang đăng nhập: <b>" + esc(me.email) + "</b> qua " + esc(via) + " · " + (me.isAdmin ? "quản trị viên" : me.canWrite ? "được tải file và lưu kỳ" : "chỉ xem") + " · máy chủ " + (me.mode === "local" ? "local" : "Cloudflare") + ".";
+  act.innerHTML = me.via === "access" ? '<a class="btn" href="/cdn-cgi/access/logout">Đăng xuất</a>'
+    : me.auth === "jwt" ? '<a class="btn" href="/account.html">' + (me.isAdmin ? "Tài khoản &amp; người dùng" : "Đổi mật khẩu") + '</a><button type="button" class="btn" id="acc-logout">Đăng xuất</button>' : "";
+  var ta = $("#top-acc");
+  if (ta && me.auth === "jwt") { ta.hidden = false; ta.textContent = me.email; ta.title = "Tài khoản, đổi mật khẩu, đăng xuất"; }
+  var lo = $("#acc-logout");
+  if (lo) lo.onclick = function () { fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" }).then(function () { location.replace("/login.html"); }, function () { location.replace("/login.html"); }); };
 }
 function canUpload() {
   if (S.canWrite === false) { toast("Bạn chỉ có quyền xem, không tải file lên được."); return false; }

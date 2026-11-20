@@ -32,7 +32,13 @@ export interface Config {
   ADYEN_REPORT_USER?: string;
   ADYEN_REPORT_PASS?: string;
   ADYEN_ACQ?: string;          // thư mục acquirer cho báo cáo Adyen, mặc định "adyen"
+  ADYEN_REPORT_BASE?: string;  // mặc định https://ca-live.adyen.com/reports/download
+  ADYEN_PULL_COMPANY?: string;  // kéo báo cáo cấp công ty theo lịch (21h VN), đặt bằng secret (npx wrangler secret put ADYEN_PULL_COMPANY); để trống = tắt
   MAX_UPLOAD_MB?: string;
+  BACKUP_TOKEN?: string;       // token sao lưu Cloudflare → local (đặt giống nhau ở hai bên)
+  JWT_SECRET?: string;         // AUTH_MODE=jwt: khoá ký phiên đăng nhập (>= 32 ký tự)
+  SESSION_HOURS?: string;      // thời hạn phiên, mặc định 12 giờ
+  PBKDF2_ITER?: string;        // số vòng băm mật khẩu mới; Worker gói free nên để ~5.000
 }
 
 export interface Platform {
@@ -43,6 +49,6 @@ export interface Platform {
   waitUntil(p: Promise<unknown>): void;
 }
 
-export interface User { email: string; canWrite: boolean; via: string }
+export interface User { email: string; canWrite: boolean; via: string; isAdmin?: boolean; mustChange?: boolean }
 
 export type AppEnv = { Variables: { p: Platform; user: User } };

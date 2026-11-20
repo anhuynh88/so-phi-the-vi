@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Đăng nhập · Sổ phí</title>
+<link rel="stylesheet" href="/auth.css">
+</head>
+<body>
+<div class="top"><span>Sổ phí thẻ &amp; ví</span></div>
+<main class="card narrow">
+  <h1>Đăng nhập</h1>
+  <p class="sub">Dùng tài khoản do quản trị viên cấp.</p>
+  <form id="f" novalidate>
+    <label for="u">Tên đăng nhập</label>
+    <input type="text" id="u" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+    <label for="p">Mật khẩu</label>
+    <input type="password" id="p" name="password" autocomplete="current-password" required>
+    <div class="row"><button class="btn primary block" type="submit" id="go">Đăng nhập</button></div>
+    <div class="msg err" id="err" role="alert"></div>
+  </form>
+</main>
+<script>
+(function () {
+  var f = document.getElementById("f"), err = document.getElementById("err"), go = document.getElementById("go");
+  // chỉ quay lại đường nội bộ (chống chuyển hướng ra trang ngoài)
+  var next = new URLSearchParams(location.search).get("next") || "/";
+  if (!/^\/(?!\/)/.test(next) || /^\/login\.html/.test(next)) next = "/";
+  f.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var u = f.username.value.trim(), p = f.password.value;
+    if (!u || !p) { err.textContent = "Nhập tên đăng nhập và mật khẩu."; return; }
+    err.textContent = ""; go.disabled = true; go.textContent = "Đang đăng nhập…";
+    fetch("/api/auth/login", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ username: u, password: p }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) {
+        if (!x.ok) throw new Error(x.j.message || "Đăng nhập không thành công.");
+        location.replace(x.j.mustChange ? "/account.html?first=1" : next);
+      })
+      .catch(function (e) {
+        err.textContent = e.message === "Failed to fetch" ? "Không kết nối được máy chủ." : e.message;
+        go.disabled = false; go.textContent = "Đăng nhập"; f.password.select();
+      });
+  });
+})();
+</script>
+</body>
+</html>

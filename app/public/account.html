@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tài khoản · Sổ phí</title>
+<link rel="stylesheet" href="/auth.css">
+</head>
+<body>
+<div class="top"><a href="/" id="home">← Sổ phí thẻ &amp; ví</a><span class="sp"></span><span class="who" id="who"></span></div>
+<main class="wrap">
+  <div class="msg warn" id="first"></div>
+
+  <section class="card">
+    <h1>Tài khoản của bạn</h1>
+    <p class="sub" id="me-sub">Đang tải…</p>
+    <form id="pw" novalidate>
+      <div class="grid">
+        <div class="full">
+          <label for="nu">Tên đăng nhập</label>
+          <input type="text" id="nu" autocomplete="username" autocapitalize="none" spellcheck="false">
+          <div class="hint">Để nguyên nếu không đổi. 3–64 ký tự: chữ thường, số, dấu . _ - @</div>
+        </div>
+        <div class="full">
+          <label for="cur">Mật khẩu hiện tại</label>
+          <input type="password" id="cur" autocomplete="current-password" required>
+        </div>
+        <div>
+          <label for="np">Mật khẩu mới</label>
+          <input type="password" id="np" autocomplete="new-password" minlength="10" required>
+          <div class="hint">Ít nhất 10 ký tự.</div>
+        </div>
+        <div>
+          <label for="np2">Nhập lại mật khẩu mới</label>
+          <input type="password" id="np2" autocomplete="new-password" minlength="10" required>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn primary" type="submit" id="pw-go">Lưu thay đổi</button>
+        <span class="sp" style="flex:1"></span>
+        <button class="btn" type="button" id="logout">Đăng xuất</button>
+        <button class="btn" type="button" id="logout-all" title="Đăng xuất trên mọi máy và trình duyệt đang dùng tài khoản này">Đăng xuất mọi nơi</button>
+      </div>
+      <div class="msg" id="pw-msg" role="status"></div>
+    </form>
+  </section>
+
+  <section class="card" id="admin" hidden>
+    <h2>Người dùng</h2>
+    <p class="sub">Người <b>chỉ xem</b> không tải file hay lưu kỳ được. Quản trị viên được quản lý người dùng. Mật khẩu do quản trị viên đặt là mật khẩu tạm: người dùng phải đổi ở lần đăng nhập tới.</p>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Tên đăng nhập</th><th>Quyền</th><th class="hide-sm">Đăng nhập gần nhất</th><th></th></tr></thead>
+      <tbody id="users"></tbody>
+    </table></div>
+    <form id="add" novalidate>
+      <h2 style="margin-top:20px">Thêm người dùng</h2>
+      <div class="grid">
+        <div><label for="a-u">Tên đăng nhập</label><input type="text" id="a-u" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+        <div><label for="a-p">Mật khẩu tạm</label><input type="text" id="a-p" autocomplete="off" spellcheck="false"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="a-w"> Được tải file và lưu kỳ</label>
+      <label class="check"><input type="checkbox" id="a-a"> Quản trị viên (gồm cả quyền ghi)</label>
+      <div class="row"><button class="btn primary" type="submit">Thêm</button><button class="btn" type="button" id="a-gen">Tạo mật khẩu ngẫu nhiên</button></div>
+      <div class="msg" id="add-msg" role="status"></div>
+    </form>
+  </section>
+</main>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var me = null;
+
+  function api(method, url, body) {
+    return fetch(url, { method: method, credentials: "same-origin", headers: body ? { "content-type": "application/json" } : {}, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (r.status === 401) { location.replace("/login.html?next=" + encodeURIComponent("/account.html")); throw new Error(j.message || "Chưa đăng nhập."); }
+          if (!r.ok) throw new Error(j.message || "Máy chủ trả lỗi " + r.status + ".");
+          return j;
+        });
+      }, function () { throw new Error("Không kết nối được máy chủ."); });
+  }
+  function say(el, text, kind) { el.className = "msg " + (kind || ""); el.textContent = text || ""; }
+  function fmt(t) { if (!t) return "chưa"; try { return new Date(t).toLocaleString("vi-VN"); } catch (e) { return t; } }
+  function randPw() {
+    var a = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789", b = new Uint32Array(16), s = "";
+    crypto.getRandomValues(b); for (var i = 0; i < b.length; i++) s += a[b[i] % a.length];
+    return s;
+  }
+
+  function loadMe() {
+    return api("GET", "/api/me").then(function (m) {
+      me = m;
+      if (m.auth !== "jwt") { $("me-sub").textContent = "Máy chủ này không dùng tài khoản trong database (chế độ " + m.auth + "), không đổi mật khẩu ở đây được."; $("pw").hidden = true; return; }
+      $("who").textContent = m.email;
+      $("nu").value = m.email;
+      $("me-sub").innerHTML = "Đang đăng nhập: <b>" + esc(m.email) + "</b> · " + (m.isAdmin ? "quản trị viên" : m.canWrite ? "được tải file và lưu kỳ" : "chỉ xem") + " · máy chủ " + (m.mode === "local" ? "local" : "Cloudflare") + ".";
+      if (m.mustChange) {
+        $("first").textContent = "Bạn đang dùng mật khẩu tạm. Đặt mật khẩu mới để tiếp tục dùng Sổ phí.";
+        $("home").removeAttribute("href");
+        $("cur").focus();
+      } else { $("first").textContent = ""; }
+      if (m.isAdmin && !m.mustChange) { $("admin").hidden = false; loadUsers(); }
+    }, function (e) { $("me-sub").textContent = e.message; });
+  }
+
+  $("pw").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var msg = $("pw-msg"), cur = $("cur").value, np = $("np").value, np2 = $("np2").value, nu = $("nu").value.trim().toLowerCase();
+    if (!cur) return say(msg, "Nhập mật khẩu hiện tại.", "err");
+    if (np.length < 10) return say(msg, "Mật khẩu mới phải có ít nhất 10 ký tự.", "err");
+    if (np !== np2) return say(msg, "Hai lần nhập mật khẩu mới không khớp.", "err");
+    $("pw-go").disabled = true; say(msg, "");
+    api("POST", "/api/auth/password", { current: cur, newPassword: np, newUsername: nu && nu !== me.email ? nu : "" }).then(function (j) {
+      $("cur").value = $("np").value = $("np2").value = "";
+      say(msg, "Đã lưu. Tên đăng nhập: " + j.username + ". Các phiên đăng nhập khác của tài khoản này đã bị đăng xuất.", "ok");
+      var wasForced = me.mustChange;
+      return loadMe().then(function () { if (wasForced) setTimeout(function () { location.replace("/"); }, 1200); });
+    }).catch(function (er) { say(msg, er.message, "err"); }).then(function () { $("pw-go").disabled = false; });
+  });
+
+  $("logout").addEventListener("click", function () {
+    api("POST", "/api/auth/logout").then(function () { location.replace("/login.html"); }, function () { location.replace("/login.html"); });
+  });
+  $("logout-all").addEventListener("click", function () {
+    if (!confirm("Đăng xuất tài khoản này trên mọi máy và trình duyệt?")) return;
+    api("POST", "/api/auth/logout-all").then(function () { location.replace("/login.html"); }, function (er) { say($("pw-msg"), er.message, "err"); });
+  });
+
+  /* ---------------- quản trị người dùng */
+  function loadUsers() {
+    return api("GET", "/api/users").then(function (j) {
+      $("users").innerHTML = j.users.map(function (u) {
+        var role = u.isAdmin ? '<span class="chip admin">Quản trị</span>' : u.canWrite ? '<span class="chip">Ghi</span>' : '<span class="chip">Chỉ xem</span>';
+        if (u.mustChange) role += ' <span class="chip warn">Mật khẩu tạm</span>';
+        if (u.locked) role += ' <span class="chip warn">Đang khoá</span>';
+        var self = u.username === me.email, n = esc(u.username);
+        var acts = self ? '<span class="hint">bạn</span>' :
+          (u.isAdmin ? "" : '<button class="btn sm" data-act="' + (u.canWrite ? "ro" : "rw") + '" data-u="' + n + '">' + (u.canWrite ? "Chỉ cho xem" : "Cho ghi") + "</button>") +
+          '<button class="btn sm" data-act="' + (u.isAdmin ? "unadmin" : "admin") + '" data-u="' + n + '">' + (u.isAdmin ? "Bỏ quản trị" : "Cho quản trị") + "</button>" +
+          '<button class="btn sm" data-act="reset" data-u="' + n + '">Đặt lại mật khẩu</button>' +
+          '<button class="btn sm danger" data-act="del" data-u="' + n + '">Xoá</button>';
+        return "<tr><td><b>" + n + "</b></td><td>" + role + '</td><td class="hide-sm">' + esc(fmt(u.lastLogin)) + '</td><td><div class="acts">' + acts + "</div></td></tr>";
+      }).join("");
+    }, function (e) { $("users").innerHTML = '<tr><td colspan="4">' + esc(e.message) + "</td></tr>"; });
+  }
+  $("users").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-act]"); if (!b) return;
+    var u = b.getAttribute("data-u"), act = b.getAttribute("data-act"), url = "/api/users/" + encodeURIComponent(u), p;
+    if (act === "del") { if (!confirm("Xoá tài khoản " + u + "? Người này sẽ bị đăng xuất ngay.")) return; p = api("DELETE", url); }
+    else if (act === "reset") {
+      var pw = randPw();
+      if (!confirm("Đặt mật khẩu tạm mới cho " + u + "?\n\nMật khẩu tạm: " + pw + "\n\nHãy gửi mật khẩu này cho người dùng; họ phải đổi ở lần đăng nhập tới.")) return;
+      p = api("PUT", url, { password: pw }).then(function () { prompt("Mật khẩu tạm của " + u + " (chép lại trước khi đóng):", pw); });
+    }
+    else p = api("PUT", url, act === "ro" ? { canWrite: false } : act === "rw" ? { canWrite: true } : act === "admin" ? { isAdmin: true } : { isAdmin: false });
+    b.disabled = true;
+    p.then(loadUsers, function (er) { alert(er.message); b.disabled = false; });
+  });
+  $("a-gen").addEventListener("click", function () { $("a-p").value = randPw(); });
+  $("add").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var msg = $("add-msg"), u = $("a-u").value.trim().toLowerCase(), pw = $("a-p").value;
+    if (!u) return say(msg, "Nhập tên đăng nhập.", "err");
+    if (pw.length < 10) return say(msg, "Mật khẩu tạm phải có ít nhất 10 ký tự.", "err");
+    api("GET", "/api/users").then(function (j) {
+      if (j.users.some(function (x) { return x.username === u; })) throw new Error("Tên đăng nhập đã có.");
+      return api("PUT", "/api/users/" + encodeURIComponent(u), { password: pw, canWrite: $("a-w").checked, isAdmin: $("a-a").checked });
+    }).then(function () {
+      say(msg, "Đã thêm " + u + ". Gửi mật khẩu tạm cho người dùng; họ phải đổi ở lần đăng nhập đầu.", "ok");
+      $("a-u").value = $("a-p").value = ""; $("a-w").checked = $("a-a").checked = false;
+      loadUsers();
+    }).catch(function (er) { say(msg, er.message, "err"); });
+  });
+
+  if (new URLSearchParams(location.search).get("first")) $("first").textContent = "Bạn đang dùng mật khẩu tạm. Đặt mật khẩu mới để tiếp tục dùng Sổ phí.";
+  loadMe();
+})();
+</script>
+</body>
+</html>

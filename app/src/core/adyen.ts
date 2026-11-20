@@ -91,3 +91,85 @@ export async function downloadReport(p: Platform, jobId: string): Promise<void> 
     await logIngest(p, jobId, "adyen", "failed", { ...d, error: (e as Error).message }, true);
   }
 }
+
+/* ---------------- Kéo báo cáo theo lịch (không cần webhook).
+   Báo cáo cấp công ty Adyen tự sinh mỗi ngày (cho ngày hôm trước), tên file đoán được theo ngày:
+     settlement_detail_report_YYYY-MM-DD_YYYY-MM-DD.csv   (Settlement details, company-level)
+     payments_accounting_report_YYYY_MM_DD.csv           (Payment accounting)
+     received_payments_report_YYYY_MM_DD.csv             (Received payment details)
+   Mỗi lần chạy thử các ngày trong PULL_DAYS ngày gần nhất; file chưa có (404) thì bỏ qua, lần sau thử lại.
+   Chỉ dùng credential Report user (role Merchant Report Download), tức là chỉ đọc. */
+
+export const PULL_CRON = "0 14 * * *"; // 21:00 giờ Việt Nam (UTC+7)
+const PULL_DAYS = 3;
+
+export const COMPANY_REPORTS: { key: string; name: (d: string) => string }[] = [
+  { key: "settlement", name: (d) => `settlement_detail_report_${d}_${d}.csv` },
+  { key: "payments_accounting", name: (d) => `payments_accounting_report_${d.replace(/-/g, "_")}.csv` },
+  { key: "received_payments", name: (d) => `received_payments_report_${d.replace(/-/g, "_")}.csv` },
+];
+
+export interface PullResult { company: string; got: string[]; missing: string[]; failed: string[]; stoppedBy?: string }
+
+function reportBase(cfg: Platform["cfg"]): string {
+  return (cfg.ADYEN_REPORT_BASE || "https://ca-live.adyen.com/reports/download").replace(/\/+$/, "");
+}
+
+function authHeaders(cfg: Platform["cfg"]): Record<string, string> {
+  if (cfg.ADYEN_REPORT_API_KEY) return { "X-API-Key": cfg.ADYEN_REPORT_API_KEY };
+  if (cfg.ADYEN_REPORT_USER && cfg.ADYEN_REPORT_PASS) return { Authorization: "Basic " + btoa(cfg.ADYEN_REPORT_USER + ":" + cfg.ADYEN_REPORT_PASS) };
+  throw new Error("Chưa đặt ADYEN_REPORT_API_KEY hoặc ADYEN_REPORT_USER/PASS");
+}
+
+/** Các ngày báo cáo (YYYY-MM-DD) cần thử: hôm qua theo giờ Việt Nam và lùi thêm, mới nhất trước. */
+export function reportDays(nowIso: string, days = PULL_DAYS): string[] {
+  const vn = new Date(new Date(nowIso).getTime() + 7 * 3600_000);
+  const out: string[] = [];
+  for (let i = 1; i <= days; i++) out.push(new Date(vn.getTime() - i * 86400_000).toISOString().slice(0, 10));
+  return out;
+}
+
+export async function pullCompanyReports(p: Platform, company: string, nowIso = new Date().toISOString()): Promise<PullResult> {
+  const out: PullResult = { company, got: [], missing: [], failed: [] };
+  const headers = authHeaders(p.cfg);
+  outer: for (const day of reportDays(nowIso)) {
+    for (const r of COMPANY_REPORTS) {
+      const name = r.name(day);
+      const id = "adyen:" + name;
+      const seen = await p.db.all<{ status: string }>("SELECT status FROM ingest_log WHERE id = ?", [id]);
+      if (seen.length && ["done", "duplicate", "rejected"].includes(seen[0].status)) continue;
+      const url = `${reportBase(p.cfg)}/Company/${encodeURIComponent(company)}/${name}`;
+      let res: Response;
+      try { res = await fetch(url, { headers, redirect: "manual" }); }
+      catch (e) { out.stoppedBy = "network: " + String((e as Error)?.message || e).slice(0, 200); break outer; }
+      if (res.status === 404) { out.missing.push(name); continue; }
+      if (res.status === 401 || res.status === 403) { out.stoppedBy = "Adyen từ chối key (" + res.status + ")"; break outer; }
+      const detail = { name, url, eventDate: day + "T00:00:00Z" };
+      if (!res.ok) { await logIngest(p, id, "adyen", "failed", { ...detail, error: "Adyen trả mã " + res.status }, true); out.failed.push(name); continue; }
+      try {
+        const bytes = new Uint8Array(await res.arrayBuffer());
+        const f = await addIngestedFile(p, { month: day.slice(0, 7), sec: "ECOM", acq: p.cfg.ADYEN_ACQ || "adyen", name, bytes, source: "adyen", actor: "adyen-cron" });
+        await logIngest(p, id, "adyen", f.duplicate ? "duplicate" : "done", { ...detail, fileId: f.id, size: bytes.byteLength }, true);
+        out.got.push(name);
+      } catch (e) {
+        // vd file quá 25 MB khi kho là KV: thử lại không giúp gì nên đánh dấu rejected
+        const msg = String((e as Error)?.message || e).slice(0, 300);
+        await logIngest(p, id, "adyen", /quá 25 MB/.test(msg) ? "rejected" : "failed", { ...detail, error: msg }, true);
+        out.failed.push(name);
+      }
+    }
+  }
+  await logIngest(p, "adyen-pull:" + company, "adyen-pull", "state", { at: nowIso, ...out });
+  return out;
+}
+
+/** Chạy cho mọi công ty trong ADYEN_PULL_COMPANY (cách nhau dấu phẩy). */
+export async function runAdyenPull(p: Platform, nowIso?: string): Promise<PullResult[]> {
+  const list = (p.cfg.ADYEN_PULL_COMPANY || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const out: PullResult[] = [];
+  for (const c of list) {
+    try { out.push(await pullCompanyReports(p, c, nowIso)); }
+    catch (e) { out.push({ company: c, got: [], missing: [], failed: [], stoppedBy: "lỗi: " + String((e as Error)?.message || e).slice(0, 200) }); }
+  }
+  return out;
+}
