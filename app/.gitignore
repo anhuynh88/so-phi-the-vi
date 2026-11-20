@@ -7,3 +7,4 @@ data/
 agent/agent.json
 agent/*.state.json
 .secrets/
+data.old*/
