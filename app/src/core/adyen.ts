@@ -154,8 +154,10 @@ export async function pullCompanyReports(p: Platform, company: string, nowIso = 
       } catch (e) {
         // vd file quá 25 MB khi kho là KV: thử lại không giúp gì nên đánh dấu rejected
         const msg = String((e as Error)?.message || e).slice(0, 300);
+        const full = /storage_full|STORAGE_LIMIT_MB/.test(msg) || (e as { code?: string })?.code === "storage_full";
         await logIngest(p, id, "adyen", /quá 25 MB/.test(msg) ? "rejected" : "failed", { ...detail, error: msg }, true);
         out.failed.push(name);
+        if (full) { out.stoppedBy = "kho file đầy (STORAGE_LIMIT_MB)"; break outer; }
       }
     }
   }

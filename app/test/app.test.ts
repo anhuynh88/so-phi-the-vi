@@ -426,3 +426,43 @@ test("Kéo báo cáo: key bị Adyen từ chối thì dừng ngay", async () => 
     assert.equal(n, 1);
   } finally { globalThis.fetch = realFetch; }
 });
+
+test("Giới hạn kho file (STORAGE_LIMIT_MB): vượt thì từ chối file mới, việc kéo báo cáo dừng lại", async () => {
+  const { pullCompanyReports } = await import("../src/core/adyen");
+  const p = makePlatform({ ADYEN_REPORT_API_KEY: "k", STORAGE_LIMIT_MB: "1" });
+  const realFetch = globalThis.fetch;
+  let n = 0;
+  globalThis.fetch = (async () => { n++; return new Response(new Uint8Array(700 * 1024)); }) as typeof fetch;
+  try {
+    const r = await pullCompanyReports(p, "CongTyMau", "2026-11-20T14:00:00Z");
+    assert.equal(r.got.length, 1);          // file 700 KB đầu vừa giới hạn 1 MB
+    assert.match(r.stoppedBy || "", /đầy/); // file thứ hai vượt nên dừng
+    assert.equal(n, 2);
+  } finally { globalThis.fetch = realFetch; }
+  const s = await p.db.all<{ n: number }>("SELECT COUNT(*) AS n FROM blobs");
+  assert.equal(s[0].n, 1);
+});
+
+test("FIFO: kho vượt OFFLOAD_ABOVE_MB thì file cũ nhất (đã có ở local) chuyển về local, mở lại qua tunnel", async () => {
+  const { offloadOldBlobs } = await import("../src/core/replica");
+  const { createBlob, getBlob, storageUsage } = await import("../src/core/store");
+  const local = new Map<string, Uint8Array>();
+  const p = makePlatform({ OFFLOAD_ABOVE_MB: "1" });
+  p.fetchOffloaded = async (id) => local.get(id) || null;
+  const ids: string[] = [];
+  for (let i = 0; i < 4; i++) {
+    ids.push(await createBlob(p, new Uint8Array(400 * 1024).fill(i), "text/csv", "t"));
+    await p.db.run("UPDATE blobs SET created_at = ? WHERE id = ?", ["2026-11-0" + (i + 1) + "T00:00:00Z", ids[i]]);
+  }
+  // local mới có 3 file đầu (file thứ 4 chưa sao lưu xong)
+  for (const id of ids.slice(0, 3)) local.set(id, p.files.get("blobs/" + id)!);
+  const r = await offloadOldBlobs(p, new Set(local.keys()));
+  // 1600 KB > 1024 KB: chuyển file cũ nhất cho tới khi <= 1 MB -> chuyển 2 file đầu
+  assert.equal(r.offloaded, 2);
+  assert.ok(!p.files.has("blobs/" + ids[0]) && !p.files.has("blobs/" + ids[1]) && p.files.has("blobs/" + ids[2]));
+  assert.equal((await storageUsage(p)).usedBytes, 800 * 1024);
+  const b = await getBlob(p, ids[0]);
+  assert.equal((b!.body as Uint8Array)[0], 0); // đọc lại được từ local
+  local.clear();
+  await assert.rejects(() => getBlob(p, ids[1]), /máy local đang tắt/);
+});
