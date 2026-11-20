@@ -30,7 +30,7 @@
   // Kho file: đang dùng KV vì tài khoản chưa bật R2 (R2 cần khai thanh toán). KV free: 1 GB, 25 MB/file, 1.000 lần ghi/ngày.
   // Khi đã bật R2: npx wrangler r2 bucket create so-phi-files, bỏ chú thích dòng r2_buckets bên dưới rồi deploy lại.
   // Worker ưu tiên R2 nếu có; file đã lưu trong KV cần chép sang R2 trước khi gỡ KV.
-  // "r2_buckets": [{ "binding": "FILES", "bucket_name": "so-phi-files" }],
+  "r2_buckets": [{ "binding": "FILES", "bucket_name": "so-phi-files" }],
   "kv_namespaces": [{ "binding": "FILES_KV", "id": "693aa8a1f74c46699732f1db01f8ac74" }],
 
   // Sao lưu sang máy local qua Cloudflare Tunnel "sophi-backup" (Workers VPC, không cần tên miền / địa chỉ công khai).
@@ -58,6 +58,11 @@
     "WRITER_EMAILS": "admin",
     "ADYEN_ACQ": "adyen",
     "MAX_UPLOAD_MB": "50",
+    // Kho R2 (10 GB miễn phí): giữ trên Cloudflare tối đa 8 GB. Vượt thì lần sao lưu mỗi giờ chuyển file cũ nhất
+    // (đã có ở máy local) về local và xoá khỏi R2; Worker đọc lại qua tunnel khi có người mở.
+    // STORAGE_LIMIT_MB là trần cứng (vd local tắt lâu ngày không chuyển được): vượt thì từ chối file mới.
+    "OFFLOAD_ABOVE_MB": "8192",
+    "STORAGE_LIMIT_MB": "9500",
     "BACKUP_ORIGIN": "http://127.0.0.1:8788"
   }
 }

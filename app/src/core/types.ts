@@ -35,6 +35,8 @@ export interface Config {
   ADYEN_REPORT_BASE?: string;  // mặc định https://ca-live.adyen.com/reports/download
   ADYEN_PULL_COMPANY?: string;  // kéo báo cáo cấp công ty theo lịch (21h VN), đặt bằng secret (npx wrangler secret put ADYEN_PULL_COMPANY); để trống = tắt
   MAX_UPLOAD_MB?: string;
+  STORAGE_LIMIT_MB?: string;   // giới hạn cứng tổng dung lượng file gốc trên kho này; vượt thì từ chối file mới
+  OFFLOAD_ABOVE_MB?: string;   // Worker: kho vượt mức này thì chuyển file cũ nhất (đã có ở local) về local và xoá khỏi kho
   BACKUP_TOKEN?: string;       // token sao lưu Cloudflare → local (đặt giống nhau ở hai bên)
   JWT_SECRET?: string;         // AUTH_MODE=jwt: khoá ký phiên đăng nhập (>= 32 ký tự)
   SESSION_HOURS?: string;      // thời hạn phiên, mặc định 12 giờ
@@ -47,6 +49,8 @@ export interface Platform {
   blobs: BlobStore;
   cfg: Config;
   waitUntil(p: Promise<unknown>): void;
+  /** Đọc file đã chuyển về máy local (Worker: qua tunnel sao lưu). */
+  fetchOffloaded?(id: string): Promise<ReadableStream | Uint8Array | null>;
 }
 
 export interface User { email: string; canWrite: boolean; via: string; isAdmin?: boolean; mustChange?: boolean }

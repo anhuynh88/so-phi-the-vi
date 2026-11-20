@@ -83,6 +83,14 @@ function platform(env: Env, ctx: ExecutionContext): Platform {
   const lazy = (): BlobStore => (blobs ??= blobsOf(env));
   return {
     mode: "cloudflare", db: d1(env.DB), cfg: env, waitUntil: (p) => ctx.waitUntil(p),
+    fetchOffloaded: async (id) => {
+      if (!env.BACKUP || !env.BACKUP_TOKEN) return null;
+      try {
+        const base = (env.BACKUP_ORIGIN || "http://127.0.0.1:8788").replace(/\/+$/, "");
+        const r = await env.BACKUP.fetch(base + "/_replica/blob/" + id, { headers: { authorization: "Bearer " + env.BACKUP_TOKEN } });
+        return r.ok && r.body ? r.body : null;
+      } catch { return null; }
+    },
     blobs: { put: (k, b) => lazy().put(k, b), get: (k) => lazy().get(k), delete: (k) => lazy().delete(k) },
   };
 }

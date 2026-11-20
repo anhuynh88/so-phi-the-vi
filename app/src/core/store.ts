@@ -154,7 +154,17 @@ export async function del(p: Platform, col: Col, id: string, actor: string): Pro
 
 /* ---------------------------------------------------------------- blobs (nội dung file) */
 
+/** Giới hạn tổng dung lượng file gốc (STORAGE_LIMIT_MB). Vượt thì không nhận file mới, để không vượt gói miễn phí. */
+export async function storageUsage(p: Platform): Promise<{ usedBytes: number; limitBytes: number }> {
+  const r = await p.db.all<{ s: number | null }>("SELECT SUM(size) AS s FROM blobs WHERE offloaded = 0");
+  const mb = Number(p.cfg.STORAGE_LIMIT_MB);
+  return { usedBytes: Number(r[0]?.s || 0), limitBytes: mb > 0 ? mb * 1048576 : Infinity };
+}
+
 export async function createBlob(p: Platform, bytes: Uint8Array, contentType: string, actor: string, sha256?: string): Promise<string> {
+  const { usedBytes, limitBytes } = await storageUsage(p);
+  if (usedBytes + bytes.byteLength > limitBytes)
+    throw new HttpError(507, "storage_full", `Kho file đã dùng ${(usedBytes / 1048576).toFixed(0)} MB, chạm giới hạn ${(limitBytes / 1048576).toFixed(0)} MB (STORAGE_LIMIT_MB). Xoá bớt file cũ hoặc nâng giới hạn.`);
   const id = rid("b");
   await p.blobs.put("blobs/" + id, bytes);
   await p.db.run("INSERT INTO blobs(id, content_type, size, sha256, created_at, created_by) VALUES (?,?,?,?,?,?)",
@@ -164,9 +174,15 @@ export async function createBlob(p: Platform, bytes: Uint8Array, contentType: st
 
 export async function getBlob(p: Platform, id: string) {
   if (!/^b[a-z0-9]{6,40}$/.test(id)) return null;
-  const meta = await p.db.all<{ content_type: string; size: number }>("SELECT content_type, size FROM blobs WHERE id = ?", [id]);
+  const meta = await p.db.all<{ content_type: string; size: number; offloaded: number }>("SELECT content_type, size, offloaded FROM blobs WHERE id = ?", [id]);
   if (!meta.length) return null;
-  const body = await p.blobs.get("blobs/" + id);
+  let body = await p.blobs.get("blobs/" + id);
+  if (!body && meta[0].offloaded) {
+    // file đã chuyển về máy local: đọc lại qua tunnel
+    if (!p.fetchOffloaded) throw new HttpError(503, "offloaded", "File đã chuyển về máy local.");
+    body = await p.fetchOffloaded(id);
+    if (!body) throw new HttpError(503, "offloaded_unavailable", "File đã chuyển về máy local nhưng máy local đang tắt hoặc tunnel chưa chạy.");
+  }
   if (!body) return null;
   return { body, contentType: meta[0].content_type || "application/octet-stream", size: meta[0].size };
 }

@@ -4,7 +4,9 @@
    (env.BACKUP), cùng các file gốc mà máy local chưa có. Bản local ghi đè các bảng của mình bằng bản chụp này,
    nên máy local là bản sao (chỉ để xem / dự phòng): dữ liệu sửa trực tiếp trên local sẽ bị ghi đè ở lần sao lưu sau.
 
-   Bên nhận (node.ts): POST /_replica/snapshot, GET /_replica/blobs, PUT /_replica/blob/:id
+   Bên nhận (node.ts): POST /_replica/snapshot, GET /_replica/blobs, PUT/GET /_replica/blob/:id
+   Kho Cloudflare vượt OFFLOAD_ABOVE_MB: file cũ nhất đã có ở local bị xoá khỏi kho Cloudflare (blobs.offloaded = 1),
+   Worker đọc lại qua GET /_replica/blob/:id khi có người mở.
    Xác thực: Authorization: Bearer <BACKUP_TOKEN> (>= 24 ký tự, đặt giống nhau ở hai bên). */
 import type { Hono } from "hono";
 import type { AppEnv, Platform, SqlStmt } from "./types";
@@ -76,13 +78,21 @@ export function mountReplica(app: Hono<AppEnv>, p: Platform): void {
     await p.blobs.put("blobs/" + id, new Uint8Array(await c.req.arrayBuffer()));
     return c.json({ ok: true });
   });
+  app.get("/_replica/blob/:id", async (c) => {
+    checkBackupToken(c.req.raw, p.cfg.BACKUP_TOKEN);
+    const id = c.req.param("id");
+    if (!/^b[a-z0-9]{6,40}$/.test(id)) throw new HttpError(400, "invalid_argument", "id không hợp lệ");
+    const body = await p.blobs.get("blobs/" + id);
+    if (!body) throw new HttpError(404, "not_found", "Máy local không có file này.");
+    return new Response(body as BodyInit, { headers: { "content-type": "application/octet-stream" } });
+  });
 }
 
 /* ---------------------------------------------------------------- bên gửi (Worker) */
 
 export interface BackupTarget { fetch(input: string, init?: RequestInit): Promise<Response> }
 
-export interface BackupResult { skipped?: boolean; tables?: Record<string, number>; blobsSent: number; blobsLeft: number; at: string }
+export interface BackupResult { skipped?: boolean; tables?: Record<string, number>; blobsSent: number; blobsLeft: number; offloaded?: number; offloadedBytes?: number; at: string }
 
 async function signature(p: Platform): Promise<string> {
   const r = await p.db.all<Record<string, unknown>>(
@@ -118,7 +128,28 @@ export async function runBackup(p: Platform, target: BackupTarget, origin: strin
     if (!body) continue;
     const r = await target.fetch(base + "/_replica/blob/" + b.id, { method: "PUT", headers: { ...auth, "content-type": "application/octet-stream" }, body: body as BodyInit });
     if (!r.ok) throw new Error("Gửi file " + b.id + " lỗi " + r.status);
+    have.add(b.id);
     sent++;
   }
-  return { skipped, tables, blobsSent: sent, blobsLeft: missing.length - sent, at: now(), sig };
+  const off = await offloadOldBlobs(p, have);
+  return { skipped, tables, blobsSent: sent, blobsLeft: missing.length - sent, ...off, at: now(), sig };
+}
+
+/** Kho Cloudflare vượt OFFLOAD_ABOVE_MB: xoá khỏi kho các file cũ nhất mà máy local đã có, tới khi về dưới mức đó. */
+export async function offloadOldBlobs(p: Platform, onLocal: Set<string>): Promise<{ offloaded: number; offloadedBytes: number }> {
+  const mb = Number(p.cfg.OFFLOAD_ABOVE_MB);
+  if (!(mb > 0)) return { offloaded: 0, offloadedBytes: 0 };
+  const target = mb * 1048576;
+  const used = Number((await p.db.all<{ s: number | null }>("SELECT SUM(size) AS s FROM blobs WHERE offloaded = 0"))[0]?.s || 0);
+  let over = used - target, n = 0, bytes = 0;
+  if (over <= 0) return { offloaded: 0, offloadedBytes: 0 };
+  const rows = await p.db.all<{ id: string; size: number }>("SELECT id, size FROM blobs WHERE offloaded = 0 ORDER BY created_at");
+  for (const b of rows) {
+    if (over <= 0) break;
+    if (!onLocal.has(b.id)) continue; // chỉ xoá file đã chắc chắn có ở local
+    await p.db.run("UPDATE blobs SET offloaded = 1 WHERE id = ?", [b.id]);
+    await p.blobs.delete("blobs/" + b.id);
+    over -= b.size || 0; bytes += b.size || 0; n++;
+  }
+  return { offloaded: n, offloadedBytes: bytes };
 }
